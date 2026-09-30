@@ -1,0 +1,3 @@
+STRING("hello")
+STRING('hello')
+STRING("string com espaços")

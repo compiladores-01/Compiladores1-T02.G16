@@ -1,0 +1,6 @@
+# Binários de teste
+test_lexer
+
+# Arquivos temporários
+*.o
+*.out
