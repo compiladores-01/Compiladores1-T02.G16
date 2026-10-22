@@ -2,13 +2,6 @@
 #include <stdlib.h>
 #include "parser.tab.h"
 #include <string.h>
-
-static char *copiarLexema(const char *texto) {
-    size_t tamanho = strlen(texto) + 1;
-    char *copia = malloc(tamanho);
-    if (copia) memcpy(copia, texto, tamanho);
-    return copia;
-}
 %}
 
 %%
@@ -32,7 +25,6 @@ static char *copiarLexema(const char *texto) {
 [a-zA-Z_][a-zA-Z0-9_]* {
     if (strcmp(yytext, "true") == 0 || strcmp(yytext, "false") == 0)
         return BOOLEAN;
-    yylval.texto = copiarLexema(yytext);
     return IDENTIFIER;
 }
 "="             {return ATRIBUES;}
@@ -40,9 +32,9 @@ static char *copiarLexema(const char *texto) {
 "-"             { return MINUS; }
 "*"             { return TIMES; }
 "/"             { return DIVIDE; }
-[0-9]+          { yylval.inteiro = atoi(yytext); return NUMBER; }
+[0-9]+          { yylval = atoi(yytext); return NUMBER; }
 [0-9]+\.[0-9]+       { return FLOAT; }
-\"[^\"]*\"            { yylval.texto = copiarLexema(yytext); return STRING; }
+\"[^\"]*\"            { return STRING; }
 #.*             { /* Ignorar comentário */ }
 
 
