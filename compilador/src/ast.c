@@ -69,51 +69,67 @@ NoAST *criarNoPrograma(NoAST *comandos) {
     return no;
 }
 
-static void imprimirLista(const NoAST *no) {
-    for (; no; no = no->proximo) {
-        if (no->esquerda) {
-            imprimirAST(no->esquerda);
-            printf("\n");
-        }
+NoAST *criarNoWhile(NoAST *condicao, NoAST *comandos) {
+    NoAST *no = criarNo(AST_WHILE);
+    if (no) { no->esquerda = condicao; no->direita = comandos; }
+    return no;
+}
+
+static void imprimirNo(const NoAST *raiz, const char *prefixo, int ultimo) {
+    if (!raiz) return;
+
+    printf("%s%s", prefixo, ultimo ? "`-- " : "|-- ");
+
+    switch (raiz->tipo) {
+        case AST_NUM:
+            printf("Numero: %d\n", raiz->valor);
+            break;
+        case AST_STRING:
+            printf("String: \"%s\"\n", raiz->texto);
+            break;
+        case AST_ID:
+            printf("Identificador: %s\n", raiz->nome);
+            break;
+        case AST_OP:
+            printf("Operador: %c\n", raiz->operador);
+            break;
+        case AST_ATRIB:
+            printf("Atribuicao\n");
+            break;
+        case AST_PRINT:
+            printf("Print\n");
+            break;
+        case AST_LISTA_CMD:
+            printf("Comando\n");
+            break;
+        case AST_PROGRAMA:
+            printf("Programa\n");
+            break;
+        case AST_WHILE:
+            printf("While\n");
+            break;
     }
+
+    char proximoPrefixo[256];
+    snprintf(proximoPrefixo, sizeof(proximoPrefixo), "%s%s", prefixo,
+             ultimo ? "    " : "|   ");
+
+    const NoAST *filhos[2] = {raiz->esquerda, raiz->direita};
+    int quantidade = filhos[1] ? 2 : filhos[0] ? 1 : 0;
+    for (int i = 0; i < quantidade; i++)
+        imprimirNo(filhos[i], proximoPrefixo, i == quantidade - 1);
+
+    for (const NoAST *item = raiz->proximo; item; item = item->proximo)
+        imprimirNo(item, prefixo, item->proximo == NULL);
 }
 
 void imprimirAST(const NoAST *raiz) {
     if (!raiz) return;
-
-    switch (raiz->tipo) {
-        case AST_NUM:
-            printf("%d", raiz->valor);
-            break;
-        case AST_STRING:
-            printf("%s", raiz->texto);
-            break;
-        case AST_ID:
-            printf("%s", raiz->nome);
-            break;
-        case AST_OP:
-            printf("(");
-            imprimirAST(raiz->esquerda);
-            printf(" %c ", raiz->operador);
-            imprimirAST(raiz->direita);
-            printf(")");
-            break;
-        case AST_ATRIB:
-            imprimirAST(raiz->esquerda);
-            printf(" = ");
-            imprimirAST(raiz->direita);
-            break;
-        case AST_PRINT:
-            printf("print(");
-            imprimirAST(raiz->esquerda);
-            printf(")");
-            break;
-        case AST_LISTA_CMD:
-            imprimirLista(raiz);
-            break;
-        case AST_PROGRAMA:
-            imprimirLista(raiz->esquerda);
-            break;
+    printf("Programa\n");
+    const NoAST *comando = raiz->esquerda;
+    for (const NoAST *item = comando; item; item = item->proximo) {
+        if (item->esquerda)
+            imprimirNo(item->esquerda, "", item->proximo == NULL);
     }
 }
 

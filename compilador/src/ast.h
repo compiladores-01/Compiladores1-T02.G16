@@ -11,6 +11,7 @@ NoAST *criarNoAtrib(NoAST *id, NoAST *expressao);
 NoAST *criarNoPrint(NoAST *expressao);
 NoAST *criarNoListaCmd(NoAST *comando);
 NoAST *criarNoPrograma(NoAST *comandos);
+NoAST *criarNoWhile(NoAST *condicao, NoAST *comandos);
 void imprimirAST(const NoAST *raiz);
 void liberarAST(NoAST *raiz);
 

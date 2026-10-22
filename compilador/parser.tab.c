@@ -546,9 +546,9 @@ static const yytype_int8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    54,    54,    62,    66,    73,    74,    75,    76,    77,
-      81,    88,    92,    96,   103,   111,   118,   119,   120,   124,
-     125,   129,   130,   131,   132,   133,   134,   135,   136,   137,
-     138,   139
+      81,    88,    92,    96,   103,   109,   116,   117,   118,   122,
+     123,   127,   128,   129,   130,   131,   132,   133,   134,   135,
+     136,   137
 };
 #endif
 
@@ -1250,126 +1250,124 @@ yyreduce:
   case 14: /* while_stmt: WHILE expr LBRACE command_list RBRACE  */
 #line 103 "parser/parser.y"
                                           {
-        liberarAST((yyvsp[-3].no));
-        liberarAST((yyvsp[-1].no));
-        (yyval.no) = NULL;
+        (yyval.no) = criarNoWhile((yyvsp[-3].no), (yyvsp[-1].no));
     }
-#line 1258 "parser.tab.c"
+#line 1256 "parser.tab.c"
     break;
 
   case 15: /* block: LBRACE command_list RBRACE  */
-#line 111 "parser/parser.y"
+#line 109 "parser/parser.y"
                                {
         liberarAST((yyvsp[-1].no));
         (yyval.no) = NULL;
     }
-#line 1267 "parser.tab.c"
+#line 1265 "parser.tab.c"
     break;
 
   case 16: /* expr: NUMBER  */
-#line 118 "parser/parser.y"
+#line 116 "parser/parser.y"
            { (yyval.no) = criarNoNum((yyvsp[0].inteiro)); }
-#line 1273 "parser.tab.c"
+#line 1271 "parser.tab.c"
     break;
 
   case 17: /* expr: FLOAT  */
-#line 119 "parser/parser.y"
+#line 117 "parser/parser.y"
           { (yyval.no) = NULL; }
-#line 1279 "parser.tab.c"
+#line 1277 "parser.tab.c"
     break;
 
   case 18: /* expr: STRING  */
-#line 120 "parser/parser.y"
+#line 118 "parser/parser.y"
            {
         (yyval.no) = criarNoString((yyvsp[0].texto));
         free((yyvsp[0].texto));
     }
-#line 1288 "parser.tab.c"
+#line 1286 "parser.tab.c"
     break;
 
   case 19: /* expr: BOOLEAN  */
-#line 124 "parser/parser.y"
+#line 122 "parser/parser.y"
             { (yyval.no) = NULL; }
-#line 1294 "parser.tab.c"
+#line 1292 "parser.tab.c"
     break;
 
   case 20: /* expr: IDENTIFIER  */
-#line 125 "parser/parser.y"
+#line 123 "parser/parser.y"
                {
         (yyval.no) = criarNoId((yyvsp[0].texto));
         free((yyvsp[0].texto));
     }
-#line 1303 "parser.tab.c"
+#line 1301 "parser.tab.c"
     break;
 
   case 21: /* expr: expr PLUS expr  */
-#line 129 "parser/parser.y"
+#line 127 "parser/parser.y"
                    { (yyval.no) = criarNoOp('+', (yyvsp[-2].no), (yyvsp[0].no)); }
-#line 1309 "parser.tab.c"
+#line 1307 "parser.tab.c"
     break;
 
   case 22: /* expr: expr MINUS expr  */
-#line 130 "parser/parser.y"
+#line 128 "parser/parser.y"
                     { (yyval.no) = criarNoOp('-', (yyvsp[-2].no), (yyvsp[0].no)); }
-#line 1315 "parser.tab.c"
+#line 1313 "parser.tab.c"
     break;
 
   case 23: /* expr: expr TIMES expr  */
-#line 131 "parser/parser.y"
+#line 129 "parser/parser.y"
                     { (yyval.no) = criarNoOp('*', (yyvsp[-2].no), (yyvsp[0].no)); }
-#line 1321 "parser.tab.c"
+#line 1319 "parser.tab.c"
     break;
 
   case 24: /* expr: expr DIVIDE expr  */
-#line 132 "parser/parser.y"
+#line 130 "parser/parser.y"
                      { (yyval.no) = criarNoOp('/', (yyvsp[-2].no), (yyvsp[0].no)); }
-#line 1327 "parser.tab.c"
+#line 1325 "parser.tab.c"
     break;
 
   case 25: /* expr: expr EQ expr  */
-#line 133 "parser/parser.y"
-                 { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1333 "parser.tab.c"
+#line 131 "parser/parser.y"
+                 { (yyval.no) = criarNoOp('=', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1331 "parser.tab.c"
     break;
 
   case 26: /* expr: expr NEQ expr  */
-#line 134 "parser/parser.y"
-                  { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1339 "parser.tab.c"
+#line 132 "parser/parser.y"
+                  { (yyval.no) = criarNoOp('!', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1337 "parser.tab.c"
     break;
 
   case 27: /* expr: expr LT expr  */
-#line 135 "parser/parser.y"
-                 { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1345 "parser.tab.c"
+#line 133 "parser/parser.y"
+                 { (yyval.no) = criarNoOp('<', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1343 "parser.tab.c"
     break;
 
   case 28: /* expr: expr GT expr  */
-#line 136 "parser/parser.y"
-                 { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1351 "parser.tab.c"
+#line 134 "parser/parser.y"
+                 { (yyval.no) = criarNoOp('>', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1349 "parser.tab.c"
     break;
 
   case 29: /* expr: expr LEQ expr  */
-#line 137 "parser/parser.y"
-                  { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1357 "parser.tab.c"
+#line 135 "parser/parser.y"
+                  { (yyval.no) = criarNoOp('L', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1355 "parser.tab.c"
     break;
 
   case 30: /* expr: expr GEQ expr  */
-#line 138 "parser/parser.y"
-                  { liberarAST((yyvsp[-2].no)); liberarAST((yyvsp[0].no)); (yyval.no) = NULL; }
-#line 1363 "parser.tab.c"
+#line 136 "parser/parser.y"
+                  { (yyval.no) = criarNoOp('G', (yyvsp[-2].no), (yyvsp[0].no)); }
+#line 1361 "parser.tab.c"
     break;
 
   case 31: /* expr: LPAREN expr RPAREN  */
-#line 139 "parser/parser.y"
+#line 137 "parser/parser.y"
                        { (yyval.no) = (yyvsp[-1].no); }
-#line 1369 "parser.tab.c"
+#line 1367 "parser.tab.c"
     break;
 
 
-#line 1373 "parser.tab.c"
+#line 1371 "parser.tab.c"
 
       default: break;
     }
@@ -1562,7 +1560,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 142 "parser/parser.y"
+#line 140 "parser/parser.y"
 
 
 void yyerror(const char *s) {

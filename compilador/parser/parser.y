@@ -101,9 +101,7 @@ if_stmt:
 
 while_stmt:
     WHILE expr LBRACE command_list RBRACE {
-        liberarAST($2);
-        liberarAST($4);
-        $$ = NULL;
+        $$ = criarNoWhile($2, $4);
     }
 ;
 
@@ -130,12 +128,12 @@ expr:
   | expr MINUS expr { $$ = criarNoOp('-', $1, $3); }
   | expr TIMES expr { $$ = criarNoOp('*', $1, $3); }
   | expr DIVIDE expr { $$ = criarNoOp('/', $1, $3); }
-  | expr EQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr NEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr LT expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr GT expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr LEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr GEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
+  | expr EQ expr { $$ = criarNoOp('=', $1, $3); }
+  | expr NEQ expr { $$ = criarNoOp('!', $1, $3); }
+  | expr LT expr { $$ = criarNoOp('<', $1, $3); }
+  | expr GT expr { $$ = criarNoOp('>', $1, $3); }
+  | expr LEQ expr { $$ = criarNoOp('L', $1, $3); }
+  | expr GEQ expr { $$ = criarNoOp('G', $1, $3); }
   | LPAREN expr RPAREN { $$ = $2; }
 ;
 

@@ -9,7 +9,8 @@ typedef enum {
     AST_ATRIB,
     AST_PRINT,
     AST_LISTA_CMD,
-    AST_PROGRAMA
+    AST_PROGRAMA,
+    AST_WHILE
 } ASTTipo;
 
 typedef struct noAST {
