@@ -1,45 +1,16 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "ast.h"
 
 int yylex(void);
 void yyerror(const char *s);
-
-static void adicionarComando(NoAST **lista, NoAST *comando) {
-    if (!comando) return;
-    NoAST *item = criarNoListaCmd(comando);
-    if (!item) return;
-    if (!*lista) {
-        *lista = item;
-        return;
-    }
-    NoAST *ultimo = *lista;
-    while (ultimo->proximo) ultimo = ultimo->proximo;
-    ultimo->proximo = item;
-}
 %}
 
-%code requires {
-#include "ast.h"
-}
-
-%union {
-    int inteiro;
-    char *texto;
-    NoAST *no;
-}
-
-%token <texto> IDENTIFIER STRING
-%token <inteiro> NUMBER
-%token FLOAT BOOLEAN
+%token IDENTIFIER ATRIBUES NUMBER FLOAT STRING BOOLEAN
 %token PRINT IF ELSE WHILE COLON NEWLINE
 %token LPAREN RPAREN LBRACE RBRACE
 %token PLUS MINUS TIMES DIVIDE
-%token EQ NEQ LEQ GEQ LT GT ATRIBUES
-
-%type <no> command_list command variable print_stmt
-%type <no> if_stmt while_stmt block expr
+%token EQ NEQ LEQ GEQ LT GT
 
 %left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
@@ -51,93 +22,52 @@ static void adicionarComando(NoAST **lista, NoAST *comando) {
 %%
 
 program:
-    command_list {
-        NoAST *raiz = criarNoPrograma($1);
-        imprimirAST(raiz);
-        liberarAST(raiz);
-    }
-;
+    command_list;
 
 command_list:
-    command {
-        $$ = NULL;
-        adicionarComando(&$$, $1);
-    }
-  | command_list command {
-        $$ = $1;
-        adicionarComando(&$$, $2);
-    }
-;
+    command |
+    command_list command;
 
 command:
-    variable NEWLINE { $$ = $1; }
-  | print_stmt NEWLINE { $$ = $1; }
-  | if_stmt { $$ = $1; }
-  | while_stmt { $$ = $1; }
-  | NEWLINE { $$ = NULL; }
-;
+    variable NEWLINE |
+    print_stmt NEWLINE |
+    if_stmt |
+    while_stmt |
+    NEWLINE;
 
 variable:
-    IDENTIFIER ATRIBUES expr {
-        $$ = criarNoAtrib(criarNoId($1), $3);
-        free($1);
-    }
-;
+    IDENTIFIER ATRIBUES expr;
 
 print_stmt:
-    PRINT LPAREN expr RPAREN { $$ = criarNoPrint($3); }
-;
+    PRINT LPAREN expr RPAREN;
 
 if_stmt:
-    IF expr COLON NEWLINE block %prec LOWER_THAN_ELSE {
-        liberarAST($2);
-        $$ = NULL;
-    }
-  | IF expr COLON NEWLINE block ELSE COLON NEWLINE block {
-        liberarAST($2);
-        $$ = NULL;
-    }
-;
+    IF expr COLON NEWLINE block %prec LOWER_THAN_ELSE |
+    IF expr COLON NEWLINE block ELSE COLON NEWLINE block;
 
 while_stmt:
-    WHILE expr LBRACE command_list RBRACE {
-        liberarAST($2);
-        liberarAST($4);
-        $$ = NULL;
-    }
-;
+    WHILE expr LBRACE command_list RBRACE;
 
 block:
-    LBRACE command_list RBRACE {
-        liberarAST($2);
-        $$ = NULL;
-    }
-;
+    LBRACE command_list RBRACE;
 
 expr:
-    NUMBER { $$ = criarNoNum($1); }
-  | FLOAT { $$ = NULL; }
-  | STRING {
-        $$ = criarNoString($1);
-        free($1);
-    }
-  | BOOLEAN { $$ = NULL; }
-  | IDENTIFIER {
-        $$ = criarNoId($1);
-        free($1);
-    }
-  | expr PLUS expr { $$ = criarNoOp('+', $1, $3); }
-  | expr MINUS expr { $$ = criarNoOp('-', $1, $3); }
-  | expr TIMES expr { $$ = criarNoOp('*', $1, $3); }
-  | expr DIVIDE expr { $$ = criarNoOp('/', $1, $3); }
-  | expr EQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr NEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr LT expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr GT expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr LEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | expr GEQ expr { liberarAST($1); liberarAST($3); $$ = NULL; }
-  | LPAREN expr RPAREN { $$ = $2; }
-;
+    NUMBER |
+    FLOAT |
+    STRING |
+    BOOLEAN |
+    IDENTIFIER |
+    expr PLUS expr |
+    expr MINUS expr |
+    expr TIMES expr |
+    expr DIVIDE expr |
+    expr EQ expr |
+    expr NEQ expr |
+    expr LT expr |
+    expr GT expr |
+    expr LEQ expr |
+    expr GEQ expr |
+    LPAREN expr RPAREN;
 
 %%
 
@@ -146,5 +76,7 @@ void yyerror(const char *s) {
 }
 
 int main(void) {
-    return yyparse();
+    yyparse();
+    return 0;
 }
+

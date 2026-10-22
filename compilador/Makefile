@@ -12,10 +12,10 @@ CFLAGS = -Wall
 all: $(TARGET)
 
 # Regra de compilação
-$(TARGET): $(PARSER) $(LEXER) ast.c ast.h tipos.h
+$(TARGET): $(PARSER) $(LEXER)
 	bison -d $(PARSER) -o parser.tab.c
 	flex -o lex.yy.c $(LEXER)
-	$(CC) $(CFLAGS) parser.tab.c lex.yy.c ast.c -o $(TARGET)
+	$(CC) $(CFLAGS) parser.tab.c lex.yy.c -o $(TARGET)
 
 # Regra para rodar os testes
 test: $(TARGET)
