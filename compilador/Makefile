@@ -25,4 +25,4 @@ test: $(TARGET)
 
 # Regra para limpar arquivos gerados
 clean:
-	rm -f $(TARGET) lex.yy.c parser.tab.c parser.tab.h parser.output temp.c temp.out
+	rm -f $(TARGET) compilador compilador.exe lex.yy.c parser.tab.c parser.tab.h parser.output temp.c temp.out
