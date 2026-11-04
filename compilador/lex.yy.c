@@ -836,38 +836,65 @@ case 16:
 YY_RULE_SETUP
 #line 25 "lexer/lexer.l"
 {
-    if (strcmp(yytext, "true") == 0 || strcmp(yytext, "false") == 0)
+    if (strcmp(yytext, "true") == 0 || strcmp(yytext, "false") == 0) {
+        yylval.inteiro = (strcmp(yytext, "true") == 0);
         return BOOLEAN;
+<<<<<<< Updated upstream
+=======
+    }
+    yylval.texto = copiarLexema(yytext);
+>>>>>>> Stashed changes
     return IDENTIFIER;
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 30 "lexer/lexer.l"
+=======
+#line 41 "lexer/lexer.l"
+>>>>>>> Stashed changes
 {return ATRIBUES;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 31 "lexer/lexer.l"
+=======
+#line 42 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { return PLUS; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 32 "lexer/lexer.l"
+=======
+#line 43 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { return MINUS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 33 "lexer/lexer.l"
+=======
+#line 44 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { return TIMES; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 34 "lexer/lexer.l"
+=======
+#line 45 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { return DIVIDE; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 35 "lexer/lexer.l"
 { yylval = atoi(yytext); return NUMBER; }
 	YY_BREAK
@@ -875,40 +902,77 @@ case 23:
 YY_RULE_SETUP
 #line 36 "lexer/lexer.l"
 { return FLOAT; }
+=======
+#line 46 "lexer/lexer.l"
+{ yylval.inteiro = atoi(yytext); return NUMBER; }
+	YY_BREAK
+case 23:
+YY_RULE_SETUP
+#line 47 "lexer/lexer.l"
+{ yylval.real = atof(yytext); return FLOAT; }
+>>>>>>> Stashed changes
 	YY_BREAK
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 37 "lexer/lexer.l"
 { return STRING; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 38 "lexer/lexer.l"
+=======
+#line 48 "lexer/lexer.l"
+{ yylval.texto = copiarLexema(yytext); return STRING; }
+	YY_BREAK
+case 25:
+YY_RULE_SETUP
+#line 49 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { /* Ignorar comentário */ }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 42 "lexer/lexer.l"
+=======
+#line 53 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { }
 	YY_BREAK
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 43 "lexer/lexer.l"
+=======
+#line 54 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { return NEWLINE; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 44 "lexer/lexer.l"
+=======
+#line 55 "lexer/lexer.l"
+>>>>>>> Stashed changes
 { printf("Caractere inválido: %s\n", yytext); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
+<<<<<<< Updated upstream
 #line 46 "lexer/lexer.l"
 ECHO;
 	YY_BREAK
 #line 912 "lex.yy.c"
+=======
+#line 57 "lexer/lexer.l"
+ECHO;
+	YY_BREAK
+#line 922 "lex.yy.c"
+>>>>>>> Stashed changes
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1913,7 +1977,11 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
+<<<<<<< Updated upstream
 #line 46 "lexer/lexer.l"
+=======
+#line 57 "lexer/lexer.l"
+>>>>>>> Stashed changes
 
 
 int yywrap(void) {

@@ -71,11 +71,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< Updated upstream
 
 int yylex(void);
 void yyerror(const char *s);
 
 #line 79 "parser.tab.c"
+=======
+#include <stdarg.h>
+#include "ast.h"
+#include "tipos.h"
+#include "tabela.h"
+
+#line 80 "parser.tab.c"
+>>>>>>> Stashed changes
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -109,6 +118,7 @@ enum yysymbol_kind_t
   YYSYMBOL_IDENTIFIER = 3,                 /* IDENTIFIER  */
   YYSYMBOL_ATRIBUES = 4,                   /* ATRIBUES  */
   YYSYMBOL_NUMBER = 5,                     /* NUMBER  */
+<<<<<<< Updated upstream
   YYSYMBOL_FLOAT = 6,                      /* FLOAT  */
   YYSYMBOL_STRING = 7,                     /* STRING  */
   YYSYMBOL_BOOLEAN = 8,                    /* BOOLEAN  */
@@ -132,6 +142,31 @@ enum yysymbol_kind_t
   YYSYMBOL_GEQ = 26,                       /* GEQ  */
   YYSYMBOL_LT = 27,                        /* LT  */
   YYSYMBOL_GT = 28,                        /* GT  */
+=======
+  YYSYMBOL_BOOLEAN = 6,                    /* BOOLEAN  */
+  YYSYMBOL_FLOAT = 7,                      /* FLOAT  */
+  YYSYMBOL_PRINT = 8,                      /* PRINT  */
+  YYSYMBOL_IF = 9,                         /* IF  */
+  YYSYMBOL_ELSE = 10,                      /* ELSE  */
+  YYSYMBOL_WHILE = 11,                     /* WHILE  */
+  YYSYMBOL_COLON = 12,                     /* COLON  */
+  YYSYMBOL_NEWLINE = 13,                   /* NEWLINE  */
+  YYSYMBOL_LPAREN = 14,                    /* LPAREN  */
+  YYSYMBOL_RPAREN = 15,                    /* RPAREN  */
+  YYSYMBOL_LBRACE = 16,                    /* LBRACE  */
+  YYSYMBOL_RBRACE = 17,                    /* RBRACE  */
+  YYSYMBOL_PLUS = 18,                      /* PLUS  */
+  YYSYMBOL_MINUS = 19,                     /* MINUS  */
+  YYSYMBOL_TIMES = 20,                     /* TIMES  */
+  YYSYMBOL_DIVIDE = 21,                    /* DIVIDE  */
+  YYSYMBOL_EQ = 22,                        /* EQ  */
+  YYSYMBOL_NEQ = 23,                       /* NEQ  */
+  YYSYMBOL_LEQ = 24,                       /* LEQ  */
+  YYSYMBOL_GEQ = 25,                       /* GEQ  */
+  YYSYMBOL_LT = 26,                        /* LT  */
+  YYSYMBOL_GT = 27,                        /* GT  */
+  YYSYMBOL_ATRIBUES = 28,                  /* ATRIBUES  */
+>>>>>>> Stashed changes
   YYSYMBOL_LOWER_THAN_ELSE = 29,           /* LOWER_THAN_ELSE  */
   YYSYMBOL_YYACCEPT = 30,                  /* $accept  */
   YYSYMBOL_program = 31,                   /* program  */
@@ -148,6 +183,113 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 
+/* Unqualified %code blocks.  */
+#line 29 "parser/parser.y"
+
+int yylex(void);
+void yyerror(const char *s);
+
+int erros_semanticos = 0;
+
+static void erroSemantico(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    fprintf(stderr, "Erro semantico: ");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+    erros_semanticos++;
+}
+
+static const char *nomeTipo(TipoDado t) {
+    switch (t) {
+        case TIPO_INTEIRO: return "inteiro";
+        case TIPO_FLOAT:   return "float";
+        case TIPO_STRING:  return "string";
+        case TIPO_BOOLEAN: return "boolean";
+        default:           return "desconhecido";
+    }
+}
+
+static int ehNumerico(TipoDado t) {
+    return t == TIPO_INTEIRO || t == TIPO_FLOAT;
+}
+
+static Expr novaExpr(NoAST *no, TipoDado tipo) {
+    Expr e;
+    e.no = no;
+    e.tipo = tipo;
+    return e;
+}
+
+/* Operadores aritmeticos. Se algum operando ja e invalido, nao gera
+   erro em cascata. */
+static TipoDado tipoAritmetico(char op, TipoDado a, TipoDado b) {
+    if (a == TIPO_DESCONHECIDO || b == TIPO_DESCONHECIDO)
+        return TIPO_DESCONHECIDO;
+
+    if (op == '+' && a == TIPO_STRING && b == TIPO_STRING)
+        return TIPO_STRING;
+
+    if (ehNumerico(a) && ehNumerico(b)) {
+        if (op == '/') return TIPO_FLOAT;   /* '/' de Python e divisao real */
+        return (a == TIPO_FLOAT || b == TIPO_FLOAT) ? TIPO_FLOAT : TIPO_INTEIRO;
+    }
+
+    erroSemantico("operador '%c' invalido entre %s e %s", op, nomeTipo(a), nomeTipo(b));
+    return TIPO_DESCONHECIDO;
+}
+
+/* Comparacoes: numero com numero, ou dois operandos do mesmo tipo. */
+static TipoDado tipoComparacao(const char *op, TipoDado a, TipoDado b) {
+    if (a == TIPO_DESCONHECIDO || b == TIPO_DESCONHECIDO)
+        return TIPO_DESCONHECIDO;
+
+    if ((ehNumerico(a) && ehNumerico(b)) || a == b)
+        return TIPO_BOOLEAN;
+
+    erroSemantico("comparacao '%s' invalida entre %s e %s", op, nomeTipo(a), nomeTipo(b));
+    return TIPO_DESCONHECIDO;
+}
+
+static void verificarCondicao(const char *estrutura, TipoDado t) {
+    if (t != TIPO_BOOLEAN && t != TIPO_DESCONHECIDO)
+        erroSemantico("condicao do '%s' deve ser boolean, mas e %s", estrutura, nomeTipo(t));
+}
+
+static void atribuir(const char *nome, TipoDado t) {
+    Simbolo *s = buscarSimbolo(nome);
+
+    if (s == NULL) {
+        if (!inserirSimbolo(nome, t))
+            erroSemantico("nao foi possivel registrar a variavel '%s'", nome);
+        return;
+    }
+
+    if (s->tipo == t || t == TIPO_DESCONHECIDO)
+        return;
+
+    if (s->tipo == TIPO_FLOAT && t == TIPO_INTEIRO)   /* int -> float */
+        return;
+
+    erroSemantico("variavel '%s' e %s e nao pode receber %s",
+                  nome, nomeTipo(s->tipo), nomeTipo(t));
+}
+
+static void adicionarComando(NoAST **lista, NoAST *comando) {
+    if (!comando) return;
+    NoAST *item = criarNoListaCmd(comando);
+    if (!item) return;
+    if (!*lista) {
+        *lista = item;
+        return;
+    }
+    NoAST *ultimo = *lista;
+    while (ultimo->proximo) ultimo = ultimo->proximo;
+    ultimo->proximo = item;
+}
+
+#line 259 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -468,9 +610,13 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  23
+#define YYFINAL  17
 /* YYLAST -- Last index in YYTABLE.  */
+<<<<<<< Updated upstream
 #define YYLAST   123
+=======
+#define YYLAST   111
+>>>>>>> Stashed changes
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  30
@@ -479,7 +625,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  31
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  65
+#define YYNSTATES  63
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   284
@@ -531,10 +677,17 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
+<<<<<<< Updated upstream
        0,    25,    25,    28,    29,    32,    33,    34,    35,    36,
       39,    42,    45,    46,    49,    52,    55,    56,    57,    58,
       59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
       69,    70
+=======
+       0,   156,   156,   168,   172,   179,   180,   181,   182,   183,
+     187,   195,   199,   204,   212,   221,   228,   229,   230,   234,
+     235,   245,   246,   247,   248,   249,   250,   251,   252,   253,
+     254,   255
+>>>>>>> Stashed changes
 };
 #endif
 
@@ -550,6 +703,7 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
+<<<<<<< Updated upstream
   "\"end of file\"", "error", "\"invalid token\"", "IDENTIFIER",
   "ATRIBUES", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "PRINT", "IF",
   "ELSE", "WHILE", "COLON", "NEWLINE", "LPAREN", "RPAREN", "LBRACE",
@@ -557,6 +711,14 @@ static const char *const yytname[] =
   "LT", "GT", "LOWER_THAN_ELSE", "$accept", "program", "command_list",
   "command", "variable", "print_stmt", "if_stmt", "while_stmt", "block",
   "expr", YY_NULLPTR
+=======
+  "\"end of file\"", "error", "\"invalid token\"", "IDENTIFIER", "STRING",
+  "NUMBER", "BOOLEAN", "FLOAT", "PRINT", "IF", "ELSE", "WHILE", "COLON",
+  "NEWLINE", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "PLUS", "MINUS",
+  "TIMES", "DIVIDE", "EQ", "NEQ", "LEQ", "GEQ", "LT", "GT", "ATRIBUES",
+  "LOWER_THAN_ELSE", "$accept", "program", "command_list", "command",
+  "variable", "print_stmt", "if_stmt", "while_stmt", "block", "expr", YY_NULLPTR
+>>>>>>> Stashed changes
 };
 
 static const char *
@@ -566,7 +728,11 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
+<<<<<<< Updated upstream
 #define YYPACT_NINF (-14)
+=======
+#define YYPACT_NINF (-31)
+>>>>>>> Stashed changes
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -580,6 +746,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
+<<<<<<< Updated upstream
       99,     5,   -13,     0,     0,   -14,     4,    99,   -14,     2,
       32,   -14,   -14,     0,     0,   -14,   -14,   -14,   -14,   -14,
        0,    -1,    73,   -14,   -14,   -14,   -14,    95,    48,    61,
@@ -587,6 +754,15 @@ static const yytype_int8 yypact[] =
        0,    99,   -14,   -14,    38,    -8,    -8,   -14,   -14,    21,
       21,    21,    21,    21,    21,    35,    99,    49,   -14,    47,
       45,   -14,    52,    38,   -14
+=======
+      33,   -10,    17,    18,    19,   -31,    38,    33,   -31,    27,
+      32,   -31,   -31,     1,     1,     1,     1,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,     1,    84,    35,    48,
+      61,    74,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,   -31,    31,    31,   -31,    -4,    -4,   -31,   -31,
+      -9,    -9,    -9,    -9,    -9,    -9,    33,    39,   -31,    26,
+      31,   -31,   -31
+>>>>>>> Stashed changes
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -595,24 +771,33 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     9,     0,     2,     3,     0,
+<<<<<<< Updated upstream
        0,     7,     8,     0,     0,    20,    16,    17,    18,    19,
        0,     0,     0,     1,     4,     5,     6,    10,     0,     0,
+=======
+       0,     7,     8,     0,     0,     0,     0,     1,     4,     5,
+       6,    20,    18,    16,    19,    17,     0,    10,     0,     0,
+>>>>>>> Stashed changes
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    11,    31,     0,    21,    22,    23,    24,    25,
-      26,    29,    30,    27,    28,     0,     0,    12,    14,     0,
-       0,    15,     0,     0,    13
+       0,     0,    11,     0,     0,    31,    21,    22,    23,    24,
+      25,    26,    29,    30,    27,    28,     0,    12,    14,     0,
+       0,    15,    13
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
+<<<<<<< Updated upstream
      -14,   -14,    -2,    -7,   -14,   -14,   -14,   -14,    15,    -3
+=======
+     -31,   -31,    -8,    -7,   -31,   -31,   -31,   -31,   -30,   -13
+>>>>>>> Stashed changes
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     6,     7,     8,     9,    10,    11,    12,    57,    21
+       0,     6,     7,     8,     9,    10,    11,    12,    57,    27
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -620,6 +805,7 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
+<<<<<<< Updated upstream
       24,    22,    14,    15,    23,    16,    17,    18,    19,    13,
       27,    28,    30,    33,    34,    20,    25,    29,    31,    32,
       33,    34,    35,    36,    37,    38,    39,    40,    45,    46,
@@ -633,10 +819,25 @@ static const yytype_int8 yytable[] =
       39,    40,     1,     0,     0,     0,     0,     0,     2,     3,
        0,     4,     0,     5,    31,    32,    33,    34,    35,    36,
       37,    38,    39,    40
+=======
+      18,    28,    29,    30,    21,    22,    23,    24,    25,    32,
+      33,    34,    35,    31,    58,    26,    34,    35,    13,    46,
+      47,    48,    49,    50,    51,    52,    53,    54,    55,     1,
+      62,    14,    15,    16,     2,     3,     1,     4,    17,     5,
+      19,     2,     3,    61,     4,    20,     5,    56,    59,    60,
+      42,     0,    18,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    43,     0,     0,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    44,     0,     0,    32,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    45,
+       0,     0,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41
+>>>>>>> Stashed changes
 };
 
 static const yytype_int8 yycheck[] =
 {
+<<<<<<< Updated upstream
        7,     4,    15,     3,     0,     5,     6,     7,     8,     4,
       13,    14,    13,    21,    22,    15,    14,    20,    19,    20,
       21,    22,    23,    24,    25,    26,    27,    28,    31,    32,
@@ -650,12 +851,27 @@ static const yytype_int8 yycheck[] =
       27,    28,     3,    -1,    -1,    -1,    -1,    -1,     9,    10,
       -1,    12,    -1,    14,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28
+=======
+       7,    14,    15,    16,     3,     4,     5,     6,     7,    18,
+      19,    20,    21,    26,    44,    14,    20,    21,    28,    32,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,     3,
+      60,    14,    14,    14,     8,     9,     3,    11,     0,    13,
+      13,     8,     9,    17,    11,    13,    13,    16,    56,    10,
+      15,    -1,    59,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    15,    -1,    -1,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    15,    -1,    -1,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    15,
+      -1,    -1,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27
+>>>>>>> Stashed changes
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
+<<<<<<< Updated upstream
        0,     3,     9,    10,    12,    14,    31,    32,    33,    34,
       35,    36,    37,     4,    15,     3,     5,     6,     7,     8,
       15,    39,    39,     0,    33,    14,    14,    39,    39,    39,
@@ -663,6 +879,15 @@ static const yytype_int8 yystos[] =
       28,    17,    16,    16,    14,    39,    39,    39,    39,    39,
       39,    39,    39,    39,    39,    32,    17,    38,    18,    32,
       11,    18,    13,    14,    38
+=======
+       0,     3,     8,     9,    11,    13,    31,    32,    33,    34,
+      35,    36,    37,    28,    14,    14,    14,     0,    33,    13,
+      13,     3,     4,     5,     6,     7,    14,    39,    39,    39,
+      39,    39,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    15,    15,    15,    15,    39,    39,    39,    39,
+      39,    39,    39,    39,    39,    39,    16,    38,    38,    32,
+      10,    17,    38
+>>>>>>> Stashed changes
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -678,7 +903,7 @@ static const yytype_int8 yyr1[] =
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     2,     2,     2,     1,     1,     1,
-       3,     4,     5,     9,     5,     3,     1,     1,     1,     1,
+       3,     4,     5,     7,     5,     3,     1,     1,     1,     1,
        1,     3,     3,     3,     3,     3,     3,     3,     3,     3,
        3,     3
 };
@@ -1143,8 +1368,239 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+<<<<<<< Updated upstream
 
 #line 1148 "parser.tab.c"
+=======
+  case 2: /* program: command_list  */
+#line 156 "parser/parser.y"
+                 {
+        if (erros_semanticos == 0) {
+            NoAST *raiz = criarNoPrograma((yyvsp[0].no));
+            imprimirAST(raiz);
+            liberarAST(raiz);
+        } else {
+            liberarAST((yyvsp[0].no));
+        }
+    }
+#line 1263 "parser.tab.c"
+    break;
+
+  case 3: /* command_list: command  */
+#line 168 "parser/parser.y"
+            {
+        (yyval.no) = NULL;
+        adicionarComando(&(yyval.no), (yyvsp[0].no));
+    }
+#line 1272 "parser.tab.c"
+    break;
+
+  case 4: /* command_list: command_list command  */
+#line 172 "parser/parser.y"
+                         {
+        (yyval.no) = (yyvsp[-1].no);
+        adicionarComando(&(yyval.no), (yyvsp[0].no));
+    }
+#line 1281 "parser.tab.c"
+    break;
+
+  case 5: /* command: variable NEWLINE  */
+#line 179 "parser/parser.y"
+                     { (yyval.no) = (yyvsp[-1].no); }
+#line 1287 "parser.tab.c"
+    break;
+
+  case 6: /* command: print_stmt NEWLINE  */
+#line 180 "parser/parser.y"
+                       { (yyval.no) = (yyvsp[-1].no); }
+#line 1293 "parser.tab.c"
+    break;
+
+  case 7: /* command: if_stmt  */
+#line 181 "parser/parser.y"
+            { (yyval.no) = (yyvsp[0].no); }
+#line 1299 "parser.tab.c"
+    break;
+
+  case 8: /* command: while_stmt  */
+#line 182 "parser/parser.y"
+               { (yyval.no) = (yyvsp[0].no); }
+#line 1305 "parser.tab.c"
+    break;
+
+  case 9: /* command: NEWLINE  */
+#line 183 "parser/parser.y"
+            { (yyval.no) = NULL; }
+#line 1311 "parser.tab.c"
+    break;
+
+  case 10: /* variable: IDENTIFIER ATRIBUES expr  */
+#line 187 "parser/parser.y"
+                             {
+        atribuir((yyvsp[-2].texto), (yyvsp[0].expr).tipo);
+        (yyval.no) = criarNoAtrib(criarNoId((yyvsp[-2].texto)), (yyvsp[0].expr).no);
+        free((yyvsp[-2].texto));
+    }
+#line 1321 "parser.tab.c"
+    break;
+
+  case 11: /* print_stmt: PRINT LPAREN expr RPAREN  */
+#line 195 "parser/parser.y"
+                             { (yyval.no) = criarNoPrint((yyvsp[-1].expr).no); }
+#line 1327 "parser.tab.c"
+    break;
+
+  case 12: /* if_stmt: IF LPAREN expr RPAREN block  */
+#line 199 "parser/parser.y"
+                                                      {
+        verificarCondicao("if", (yyvsp[-2].expr).tipo);
+        liberarAST((yyvsp[-2].expr).no);
+        (yyval.no) = NULL;
+    }
+#line 1337 "parser.tab.c"
+    break;
+
+  case 13: /* if_stmt: IF LPAREN expr RPAREN block ELSE block  */
+#line 204 "parser/parser.y"
+                                           {
+        verificarCondicao("if", (yyvsp[-4].expr).tipo);
+        liberarAST((yyvsp[-4].expr).no);
+        (yyval.no) = NULL;
+    }
+#line 1347 "parser.tab.c"
+    break;
+
+  case 14: /* while_stmt: WHILE LPAREN expr RPAREN block  */
+#line 212 "parser/parser.y"
+                                   {
+        verificarCondicao("while", (yyvsp[-2].expr).tipo);
+        liberarAST((yyvsp[-2].expr).no);
+        liberarAST((yyvsp[0].no));
+        (yyval.no) = NULL;
+    }
+#line 1358 "parser.tab.c"
+    break;
+
+  case 15: /* block: LBRACE command_list RBRACE  */
+#line 221 "parser/parser.y"
+                               {
+        liberarAST((yyvsp[-1].no));
+        (yyval.no) = NULL;
+    }
+#line 1367 "parser.tab.c"
+    break;
+
+  case 16: /* expr: NUMBER  */
+#line 228 "parser/parser.y"
+            { (yyval.expr) = novaExpr(criarNoNum((yyvsp[0].inteiro)), TIPO_INTEIRO); }
+#line 1373 "parser.tab.c"
+    break;
+
+  case 17: /* expr: FLOAT  */
+#line 229 "parser/parser.y"
+            { (yyval.expr) = novaExpr(criarNoFloat((yyvsp[0].real)), TIPO_FLOAT); }
+#line 1379 "parser.tab.c"
+    break;
+
+  case 18: /* expr: STRING  */
+#line 230 "parser/parser.y"
+            {
+        (yyval.expr) = novaExpr(criarNoString((yyvsp[0].texto)), TIPO_STRING);
+        free((yyvsp[0].texto));
+    }
+#line 1388 "parser.tab.c"
+    break;
+
+  case 19: /* expr: BOOLEAN  */
+#line 234 "parser/parser.y"
+            { (yyval.expr) = novaExpr(criarNoBool((yyvsp[0].inteiro)), TIPO_BOOLEAN); }
+#line 1394 "parser.tab.c"
+    break;
+
+  case 20: /* expr: IDENTIFIER  */
+#line 235 "parser/parser.y"
+               {
+        Simbolo *s = buscarSimbolo((yyvsp[0].texto));
+        TipoDado t = TIPO_DESCONHECIDO;
+        if (s == NULL)
+            erroSemantico("variavel '%s' usada antes de ser definida", (yyvsp[0].texto));
+        else
+            t = s->tipo;
+        (yyval.expr) = novaExpr(criarNoId((yyvsp[0].texto)), t);
+        free((yyvsp[0].texto));
+    }
+#line 1409 "parser.tab.c"
+    break;
+
+  case 21: /* expr: expr PLUS expr  */
+#line 245 "parser/parser.y"
+                     { (yyval.expr) = novaExpr(criarNoOp('+', (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoAritmetico('+', (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1415 "parser.tab.c"
+    break;
+
+  case 22: /* expr: expr MINUS expr  */
+#line 246 "parser/parser.y"
+                     { (yyval.expr) = novaExpr(criarNoOp('-', (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoAritmetico('-', (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1421 "parser.tab.c"
+    break;
+
+  case 23: /* expr: expr TIMES expr  */
+#line 247 "parser/parser.y"
+                     { (yyval.expr) = novaExpr(criarNoOp('*', (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoAritmetico('*', (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1427 "parser.tab.c"
+    break;
+
+  case 24: /* expr: expr DIVIDE expr  */
+#line 248 "parser/parser.y"
+                     { (yyval.expr) = novaExpr(criarNoOp('/', (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoAritmetico('/', (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1433 "parser.tab.c"
+    break;
+
+  case 25: /* expr: expr EQ expr  */
+#line 249 "parser/parser.y"
+                 { (yyval.expr) = novaExpr(criarNoComp("==", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao("==", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1439 "parser.tab.c"
+    break;
+
+  case 26: /* expr: expr NEQ expr  */
+#line 250 "parser/parser.y"
+                  { (yyval.expr) = novaExpr(criarNoComp("!=", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao("!=", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1445 "parser.tab.c"
+    break;
+
+  case 27: /* expr: expr LT expr  */
+#line 251 "parser/parser.y"
+                 { (yyval.expr) = novaExpr(criarNoComp("<", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao("<", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1451 "parser.tab.c"
+    break;
+
+  case 28: /* expr: expr GT expr  */
+#line 252 "parser/parser.y"
+                 { (yyval.expr) = novaExpr(criarNoComp(">", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao(">", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1457 "parser.tab.c"
+    break;
+
+  case 29: /* expr: expr LEQ expr  */
+#line 253 "parser/parser.y"
+                  { (yyval.expr) = novaExpr(criarNoComp("<=", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao("<=", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1463 "parser.tab.c"
+    break;
+
+  case 30: /* expr: expr GEQ expr  */
+#line 254 "parser/parser.y"
+                  { (yyval.expr) = novaExpr(criarNoComp(">=", (yyvsp[-2].expr).no, (yyvsp[0].expr).no), tipoComparacao(">=", (yyvsp[-2].expr).tipo, (yyvsp[0].expr).tipo)); }
+#line 1469 "parser.tab.c"
+    break;
+
+  case 31: /* expr: LPAREN expr RPAREN  */
+#line 255 "parser/parser.y"
+                       { (yyval.expr) = (yyvsp[-1].expr); }
+#line 1475 "parser.tab.c"
+    break;
+
+
+#line 1479 "parser.tab.c"
+>>>>>>> Stashed changes
 
       default: break;
     }
@@ -1337,15 +1793,33 @@ yyreturnlab:
   return yyresult;
 }
 
+<<<<<<< Updated upstream
 #line 72 "parser/parser.y"
+=======
+#line 258 "parser/parser.y"
+>>>>>>> Stashed changes
 
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintático: %s\n", s);
+    fprintf(stderr, "Erro sintatico: %s\n", s);
 }
 
 int main(void) {
+<<<<<<< Updated upstream
     yyparse();
     return 0;
+=======
+    inicializarTabela();
+
+    int resultado = yyparse();
+
+    if (resultado == 0 && erros_semanticos == 0)
+        imprimirTabela();
+
+    liberarTabela();
+
+    if (resultado != 0) return resultado;
+    return erros_semanticos ? 1 : 0;
+>>>>>>> Stashed changes
 }
 
