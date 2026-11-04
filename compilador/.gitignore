@@ -1,0 +1,14 @@
+# Executaveis gerados
+/meu_compilador
+/compilador
+/compilador.exe
+
+# Arquivos gerados pelo Flex e pelo Bison
+/lex.yy.c
+/parser.tab.c
+/parser.tab.h
+/parser.output
+
+# Arquivos temporarios
+/temp.c
+/temp.out

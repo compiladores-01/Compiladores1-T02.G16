@@ -1,14 +1,11 @@
-%{
+﻿%{
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< Updated upstream
-=======
 #include <stdarg.h>
 #include "ast.h"
 #include "tipos.h"
 #include "tabela.h"
 %}
->>>>>>> Stashed changes
 
 %code requires {
 #include "ast.h"
@@ -32,15 +29,6 @@ typedef struct {
 %code {
 int yylex(void);
 void yyerror(const char *s);
-<<<<<<< Updated upstream
-%}
-
-%token IDENTIFIER ATRIBUES NUMBER FLOAT STRING BOOLEAN
-%token PRINT IF ELSE WHILE COLON NEWLINE
-%token LPAREN RPAREN LBRACE RBRACE
-%token PLUS MINUS TIMES DIVIDE
-%token EQ NEQ LEQ GEQ LT GT
-=======
 
 int erros_semanticos = 0;
 
@@ -154,7 +142,6 @@ static void adicionarComando(NoAST **lista, NoAST *comando) {
 %type <no> command_list command variable print_stmt
 %type <no> if_stmt while_stmt block
 %type <expr> expr
->>>>>>> Stashed changes
 
 %left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
@@ -166,9 +153,6 @@ static void adicionarComando(NoAST **lista, NoAST *comando) {
 %%
 
 program:
-<<<<<<< Updated upstream
-    command_list;
-=======
     command_list {
         if (erros_semanticos == 0) {
             NoAST *raiz = criarNoPrograma($1);
@@ -179,33 +163,27 @@ program:
         }
     }
 ;
->>>>>>> Stashed changes
 
 command_list:
-    command |
-    command_list command;
+    command {
+        $$ = NULL;
+        adicionarComando(&$$, $1);
+    }
+  | command_list command {
+        $$ = $1;
+        adicionarComando(&$$, $2);
+    }
+;
 
 command:
-    variable NEWLINE |
-    print_stmt NEWLINE |
-    if_stmt |
-    while_stmt |
-    NEWLINE;
+    variable NEWLINE { $$ = $1; }
+  | print_stmt NEWLINE { $$ = $1; }
+  | if_stmt { $$ = $1; }
+  | while_stmt { $$ = $1; }
+  | NEWLINE { $$ = NULL; }
+;
 
 variable:
-<<<<<<< Updated upstream
-    IDENTIFIER ATRIBUES expr;
-
-print_stmt:
-    PRINT LPAREN expr RPAREN;
-
-if_stmt:
-    IF expr COLON NEWLINE block %prec LOWER_THAN_ELSE |
-    IF expr COLON NEWLINE block ELSE COLON NEWLINE block;
-
-while_stmt:
-    WHILE expr LBRACE command_list RBRACE;
-=======
     IDENTIFIER ATRIBUES expr {
         atribuir($1, $3.tipo);
         $$ = criarNoAtrib(criarNoId($1), $3.no);
@@ -238,30 +216,15 @@ while_stmt:
         $$ = NULL;
     }
 ;
->>>>>>> Stashed changes
 
 block:
-    LBRACE command_list RBRACE;
+    LBRACE command_list RBRACE {
+        liberarAST($2);
+        $$ = NULL;
+    }
+;
 
 expr:
-<<<<<<< Updated upstream
-    NUMBER |
-    FLOAT |
-    STRING |
-    BOOLEAN |
-    IDENTIFIER |
-    expr PLUS expr |
-    expr MINUS expr |
-    expr TIMES expr |
-    expr DIVIDE expr |
-    expr EQ expr |
-    expr NEQ expr |
-    expr LT expr |
-    expr GT expr |
-    expr LEQ expr |
-    expr GEQ expr |
-    LPAREN expr RPAREN;
-=======
     NUMBER  { $$ = novaExpr(criarNoNum($1), TIPO_INTEIRO); }
   | FLOAT   { $$ = novaExpr(criarNoFloat($1), TIPO_FLOAT); }
   | STRING  {
@@ -291,7 +254,6 @@ expr:
   | expr GEQ expr { $$ = novaExpr(criarNoComp(">=", $1.no, $3.no), tipoComparacao(">=", $1.tipo, $3.tipo)); }
   | LPAREN expr RPAREN { $$ = $2; }
 ;
->>>>>>> Stashed changes
 
 %%
 
@@ -300,10 +262,6 @@ void yyerror(const char *s) {
 }
 
 int main(void) {
-<<<<<<< Updated upstream
-    yyparse();
-    return 0;
-=======
     inicializarTabela();
 
     int resultado = yyparse();
@@ -315,6 +273,4 @@ int main(void) {
 
     if (resultado != 0) return resultado;
     return erros_semanticos ? 1 : 0;
->>>>>>> Stashed changes
 }
-
