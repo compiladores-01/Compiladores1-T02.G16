@@ -30,18 +30,21 @@ static char *copiarLexema(const char *texto) {
 ">"         { return GT; }
 
 [a-zA-Z_][a-zA-Z0-9_]* {
-    if (strcmp(yytext, "true") == 0 || strcmp(yytext, "false") == 0)
+    if (strcmp(yytext, "true") == 0 || strcmp(yytext, "false") == 0) {
+        yylval.inteiro = (strcmp(yytext, "true") == 0);
         return BOOLEAN;
+    }
     yylval.texto = copiarLexema(yytext);
     return IDENTIFIER;
 }
+
 "="             {return ATRIBUES;}
 "+"             { return PLUS; }
 "-"             { return MINUS; }
 "*"             { return TIMES; }
 "/"             { return DIVIDE; }
 [0-9]+          { yylval.inteiro = atoi(yytext); return NUMBER; }
-[0-9]+\.[0-9]+       { return FLOAT; }
+[0-9]+\.[0-9]+       { yylval.real = atof(yytext); return FLOAT; }
 \"[^\"]*\"            { yylval.texto = copiarLexema(yytext); return STRING; }
 #.*             { /* Ignorar comentário */ }
 
