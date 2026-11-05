@@ -137,6 +137,16 @@ Os testes da pasta `tests/ast/` verificam a impressão da Árvore Sintática Abs
 
 **Nota sobre o `if`:** O time declarou que a AST do `if` não foi implementada nesta versão. O teste `if_falha` serve como guia para a P2.
 
+## Testes da Tabela de Símbolos
+
+Os testes da pasta `tests/tabela/` verificam o comportamento da Tabela de Símbolos.
+
+| Teste | Status | O que verifica |
+|-------|--------|----------------|
+| `tabela/insercao` |  OK | Inserção de variáveis (int, float, string) |
+| `tabela/busca` |  OK | Busca e inferência de tipos |
+| `tabela/redeclaracao` |  Limitação | O compilador não detecta redeclaração; ele apenas sobrescreve. |
+
 ## Próximos passos
 
 1. **Corrigir strings:** suportar aspas simples, escapes e detectar strings não terminadas (o PR #25 tentou fazer isso)

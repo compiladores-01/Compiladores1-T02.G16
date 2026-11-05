@@ -1,0 +1,6 @@
+x = 10
+y = (x + 5)
+TABELA DE SIMBOLOS
+x               | INTEIRO
+y               | INTEIRO
+-----
