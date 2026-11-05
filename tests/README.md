@@ -124,6 +124,19 @@ Python usa indentação para blocos. O compilador atual **não implementa** `IND
 | `lexer/comentarios` |  OK |
 | `lexer/caracteres_invalidos` |  OK |
 
+## Testes da AST
+
+Os testes da pasta `tests/ast/` verificam a impressão da Árvore Sintática Abstrata (AST).
+
+| Teste | Status | Motivo |
+|-------|--------|--------|
+| `ast/atribuicao` |  OK | Atribuição simples funciona |
+| `ast/precedencia` |  OK | Precedência de operadores funciona |
+| `ast/print` |  Bug | As aspas da string aparecem duplicadas (`""hello""`) |
+| `ast/if_falha` |  Falha | O parser atual não consegue ler o `if` (erro sintático) |
+
+**Nota sobre o `if`:** O time declarou que a AST do `if` não foi implementada nesta versão. O teste `if_falha` serve como guia para a P2.
+
 ## Próximos passos
 
 1. **Corrigir strings:** suportar aspas simples, escapes e detectar strings não terminadas (o PR #25 tentou fazer isso)

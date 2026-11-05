@@ -1,0 +1,8 @@
+Programa
+`-- Atribuicao
+    |-- Identificador: x
+    `-- Operador: +
+        |-- Numero: 1
+        `-- Operador: *
+            |-- Numero: 2
+            `-- Numero: 3
