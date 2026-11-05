@@ -1,0 +1,1 @@
+Erro semantico: variavel 'x' e inteiro e nao pode receber string
