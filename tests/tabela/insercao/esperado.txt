@@ -1,0 +1,8 @@
+a = 10
+b = 2.5
+c = "texto"
+TABELA DE SIMBOLOS
+a               | INTEIRO
+b               | FLOAT
+c               | STRING
+-----

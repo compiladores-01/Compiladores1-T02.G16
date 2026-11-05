@@ -1,0 +1,8 @@
+# ATENCAO: O compilador atual NAO detecta redeclaracao (limitação conhecida).
+# O esperado ideal seria: Erro semantico: variavel 'x' ja declarada.
+# A saída real atual é:
+x = 10
+x = 20
+TABELA DE SIMBOLOS
+x               | INTEIRO
+-----
