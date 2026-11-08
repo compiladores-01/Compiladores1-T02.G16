@@ -9,16 +9,16 @@ TARGET = compilador-bin
 
 all: $(TARGET)
 
-$(TARGET): parser.o lex.yy.o ast.o tabela.o
+$(TARGET): parser.o lex.yy.o ast.o tabela.o geracao.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-parser.o: parser.tab.c parser.tab.h ast.h tabela.h tipos.h
+parser.o: parser.tab.c parser.tab.h ast.h tabela.h tipos.h geracao.h
 	$(CC) $(CFLAGS) -c parser.tab.c -o $@
 
 lex.yy.o: lex.yy.c parser.tab.h
 	$(CC) $(CFLAGS) -c lex.yy.c -o $@
 
-parser.tab.c: parser/parser.y ast.h tipos.h tabela.h
+parser.tab.c: parser/parser.y ast.h tipos.h tabela.h geracao.h
 	$(YACC) -d -o $@ $<
 
 parser.tab.h: parser.tab.c
@@ -32,5 +32,8 @@ ast.o: ast.c ast.h tipos.h
 tabela.o: tabela.c tabela.h tipos.h
 	$(CC) $(CFLAGS) -c tabela.c -o $@
 
+geracao.o: geracao.c geracao.h ast.h tipos.h
+	$(CC) $(CFLAGS) -c geracao.c -o $@
+
 clean:
-	rm -f $(TARGET) *.o lex.yy.c parser.tab.c parser.tab.h parser.output
+	rm -f $(TARGET) *.o lex.yy.c parser.tab.c parser.tab.h parser.output saida.c

@@ -12,3 +12,11 @@
 # Arquivos temporarios
 /temp.c
 /temp.out
+
+# Artefatos gerados ao compilar e testar
+/compilador-bin
+/saida_prog
+/saida.c
+/exec_out.txt
+/out_comp.txt
+/status.txt

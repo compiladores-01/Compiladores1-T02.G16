@@ -30,60 +30,41 @@ sudo apt-get install flex bison build-essential
 
 No Windows, recomenda-se utilizar **WSL2** ou **MSYS2 MinGW64**.
 
-### 3. Gerar os arquivos do compilador
+### 3. Compilar o compilador
 
-Na raiz do projeto, execute:
-
-```bash
-bison -d parser/parser.y -o parser.tab.c
-flex -o lex.yy.c lexer/lexer.l
-```
-
-Esses comandos geram `parser.tab.c`, `parser.tab.h` e `lex.yy.c`.
-
-### 4. Compilar o compilador
+No terminal com Flex, Bison, GCC e Make instalados, execute:
 
 ```bash
-gcc parser.tab.c lex.yy.c -o compilador
+cd compilador
+make
 ```
 
-No Windows com MSYS2, o comando equivalente pode ser executado no terminal MinGW64:
+O executável gerado é `compilador-bin`.
+
+### 4. Testar com um programa de entrada
 
 ```bash
-gcc parser.tab.c lex.yy.c -o compilador.exe
+./compilador-bin entrada.py saida.c
 ```
 
-### 5. Executar
-
-O compilador recebe a entrada pela entrada padrão:
+O compilador analisa `entrada.py` e gera o código C em `saida.c`. Para compilar e executar esse código:
 
 ```bash
-echo "1 + 2" | ./compilador
+gcc saida.c -o saida_prog
+./saida_prog
 ```
 
-Também é possível usar um arquivo:
+Também é possível testar outra entrada, passando os caminhos como argumentos:
 
 ```bash
-./compilador < entrada.py
+./compilador-bin caminho/para/programa.py caminho/para/saida.c
 ```
 
-No Windows:
-
-```bash
-Get-Content entrada.py | .\compilador.exe
-```
+No Windows, use o terminal do WSL2 ou o terminal MinGW64 do MSYS2 para executar esses comandos.
 
 ## Estado Atual
 
-O protótipo atual reconhece expressões aritméticas com:
-
-- números inteiros;
-- operadores `+`, `-`, `*` e `/`;
-- parênteses;
-- tratamento básico de caracteres inválidos;
-- análise sintática realizada pelo Bison.
-
-As próximas etapas ampliam o subconjunto de Python com variáveis, estruturas de controle, funções, análise semântica e geração de código C.
+O compilador implementa um subconjunto de Python, incluindo variáveis, expressões, impressão, condicionais, laços e funções, com análise semântica e geração de código C.
 
 
 

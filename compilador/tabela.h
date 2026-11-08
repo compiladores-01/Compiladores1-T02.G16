@@ -8,16 +8,15 @@
 typedef struct {
     char *nome;
     TipoDado tipo;
+    int escopo;
 } Simbolo;
 
 void inicializarTabela(void);
-
+void entrarEscopo(void);
+void sairEscopo(void);
 int inserirSimbolo(const char *nome, TipoDado tipo);
-
 Simbolo *buscarSimbolo(const char *nome);
-
 void imprimirTabela(void);
-
 void liberarTabela(void);
 
 #endif

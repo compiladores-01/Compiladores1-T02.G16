@@ -2,9 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include "ast.h"
 #include "tipos.h"
 #include "tabela.h"
+#include "geracao.h"
+
+extern FILE *yyin;
+extern int yylineno;
+char arquivo_saida[256] = "saida.c";
 %}
 
 %code requires {
@@ -31,6 +37,7 @@ int yylex(void);
 void yyerror(const char *s);
 
 int erros_semanticos = 0;
+static int nivel_funcao = 0;
 
 static void erroSemantico(const char *fmt, ...) {
     va_list ap;
@@ -48,6 +55,7 @@ static const char *nomeTipo(TipoDado t) {
         case TIPO_FLOAT:   return "float";
         case TIPO_STRING:  return "string";
         case TIPO_BOOLEAN: return "boolean";
+        case TIPO_FUNCAO:  return "funcao";
         default:           return "desconhecido";
     }
 }
@@ -107,10 +115,15 @@ static void atribuir(const char *nome, TipoDado t) {
         return;
     }
 
+    if (s->tipo == TIPO_FUNCAO) {
+        erroSemantico("nao e possivel atribuir a funcao '%s'", nome);
+        return;
+    }
+
     if (s->tipo == t || t == TIPO_DESCONHECIDO)
         return;
 
-    if (s->tipo == TIPO_FLOAT && t == TIPO_INTEIRO)   /* int -> float */
+    if (s->tipo == TIPO_FLOAT && t == TIPO_INTEIRO)
         return;
 
     erroSemantico("variavel '%s' e %s e nao pode receber %s",
@@ -129,34 +142,51 @@ static void adicionarComando(NoAST **lista, NoAST *comando) {
     while (ultimo->proximo) ultimo = ultimo->proximo;
     ultimo->proximo = item;
 }
+
+static NoAST *montarChamada(char *nome, NoAST *argumentos) {
+    Simbolo *s = buscarSimbolo(nome);
+    if (s == NULL)
+        erroSemantico("funcao '%s' nao foi definida", nome);
+    else if (s->tipo != TIPO_FUNCAO)
+        erroSemantico("'%s' nao e uma funcao", nome);
+    NoAST *no = criarNoChamada(nome, argumentos);
+    free(nome);
+    return no;
+}
 }
 
 %token <texto> IDENTIFIER STRING
 %token <inteiro> NUMBER BOOLEAN
 %token <real> FLOAT
-%token PRINT IF ELSE WHILE COLON NEWLINE
-%token LPAREN RPAREN LBRACE RBRACE
+%token PRINT IF ELSE WHILE DEF RETURN
+%token COLON NEWLINE COMMA
+%token INDENT DEDENT
+%token LPAREN RPAREN
 %token PLUS MINUS TIMES DIVIDE
 %token EQ NEQ LEQ GEQ LT GT ATRIBUES
 
-%type <no> command_list command variable print_stmt
-%type <no> if_stmt while_stmt block
-%type <expr> expr
+%type <no> lista_comandos comando atribuicao comando_print
+%type <no> comando_if comando_while bloco
+%type <no> definicao_funcao comando_return
+%type <no> lista_parametros parametros lista_argumentos argumentos
+%type <expr> expressao
 
 %left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
 
-%nonassoc LOWER_THAN_ELSE
+%nonassoc MENOR_QUE_ELSE
 %nonassoc ELSE
 
 %%
 
-program:
-    command_list {
+programa:
+    lista_comandos {
         if (erros_semanticos == 0) {
             NoAST *raiz = criarNoPrograma($1);
             imprimirAST(raiz);
+            if (gerarCodigoC(raiz, arquivo_saida) != 0)
+                erros_semanticos++;
             liberarAST(raiz);
         } else {
             liberarAST($1);
@@ -164,67 +194,133 @@ program:
     }
 ;
 
-command_list:
-    command {
+lista_comandos:
+    comando {
         $$ = NULL;
         adicionarComando(&$$, $1);
     }
-  | command_list command {
+  | lista_comandos comando {
         $$ = $1;
         adicionarComando(&$$, $2);
     }
 ;
 
-command:
-    variable NEWLINE { $$ = $1; }
-  | print_stmt NEWLINE { $$ = $1; }
-  | if_stmt { $$ = $1; }
-  | while_stmt { $$ = $1; }
+comando:
+    atribuicao NEWLINE { $$ = $1; }
+  | comando_print NEWLINE { $$ = $1; }
+  | comando_return NEWLINE { $$ = $1; }
+  | IDENTIFIER LPAREN lista_argumentos RPAREN NEWLINE {
+        $$ = montarChamada($1, $3);
+    }
+  | comando_if { $$ = $1; }
+  | comando_while { $$ = $1; }
+  | definicao_funcao { $$ = $1; }
   | NEWLINE { $$ = NULL; }
 ;
 
-variable:
-    IDENTIFIER ATRIBUES expr {
+atribuicao:
+    IDENTIFIER ATRIBUES expressao {
         atribuir($1, $3.tipo);
         $$ = criarNoAtrib(criarNoId($1), $3.no);
         free($1);
     }
 ;
 
-print_stmt:
-    PRINT LPAREN expr RPAREN { $$ = criarNoPrint($3.no); }
+comando_print:
+    PRINT LPAREN expressao RPAREN { $$ = criarNoPrint($3.no); }
 ;
 
-if_stmt:
-    IF LPAREN expr RPAREN block %prec LOWER_THAN_ELSE {
-        verificarCondicao("if", $3.tipo);
-        liberarAST($3.no);
-        $$ = NULL;
+comando_return:
+    RETURN expressao {
+        if (nivel_funcao == 0)
+            erroSemantico("'return' fora de funcao");
+        $$ = criarNoReturn($2.no);
     }
-  | IF LPAREN expr RPAREN block ELSE block {
-        verificarCondicao("if", $3.tipo);
-        liberarAST($3.no);
-        $$ = NULL;
-    }
-;
-
-while_stmt:
-    WHILE LPAREN expr RPAREN block {
-        verificarCondicao("while", $3.tipo);
-        liberarAST($3.no);
-        liberarAST($5);
-        $$ = NULL;
+  | RETURN {
+        if (nivel_funcao == 0)
+            erroSemantico("'return' fora de funcao");
+        $$ = criarNoReturn(NULL);
     }
 ;
 
-block:
-    LBRACE command_list RBRACE {
-        liberarAST($2);
-        $$ = NULL;
+comando_if:
+    IF expressao COLON bloco %prec MENOR_QUE_ELSE {
+        verificarCondicao("if", $2.tipo);
+        $$ = criarNoIf($2.no, $4, NULL);
+    }
+  | IF expressao COLON bloco ELSE COLON bloco {
+        verificarCondicao("if", $2.tipo);
+        $$ = criarNoIf($2.no, $4, $7);
     }
 ;
 
-expr:
+comando_while:
+    WHILE expressao COLON bloco {
+        verificarCondicao("while", $2.tipo);
+        $$ = criarNoWhile($2.no, $4);
+    }
+;
+
+bloco:
+    NEWLINE INDENT lista_comandos DEDENT { $$ = $3; }
+;
+
+definicao_funcao:
+    DEF IDENTIFIER LPAREN {
+        if (nivel_funcao > 0)
+            erroSemantico("funcoes aninhadas nao sao suportadas");
+        if (!inserirSimbolo($2, TIPO_FUNCAO))
+            erroSemantico("nome '%s' ja foi declarado", $2);
+        nivel_funcao++;
+        entrarEscopo();
+    }
+    lista_parametros RPAREN COLON bloco {
+        nivel_funcao--;
+        $$ = criarNoFunc($2, $5, $8);
+        sairEscopo();
+        free($2);
+    }
+;
+
+lista_parametros:
+    /* vazio */ { $$ = NULL; }
+  | parametros { $$ = $1; }
+;
+
+parametros:
+    IDENTIFIER {
+        if (!inserirSimbolo($1, TIPO_DESCONHECIDO))
+            erroSemantico("parametro '%s' repetido", $1);
+        $$ = NULL;
+        adicionarComando(&$$, criarNoId($1));
+        free($1);
+    }
+  | parametros COMMA IDENTIFIER {
+        if (!inserirSimbolo($3, TIPO_DESCONHECIDO))
+            erroSemantico("parametro '%s' repetido", $3);
+        $$ = $1;
+        adicionarComando(&$$, criarNoId($3));
+        free($3);
+    }
+;
+
+lista_argumentos:
+    /* vazio */ { $$ = NULL; }
+  | argumentos { $$ = $1; }
+;
+
+argumentos:
+    expressao {
+        $$ = NULL;
+        adicionarComando(&$$, $1.no);
+    }
+  | argumentos COMMA expressao {
+        $$ = $1;
+        adicionarComando(&$$, $3.no);
+    }
+;
+
+expressao:
     NUMBER  { $$ = novaExpr(criarNoNum($1), TIPO_INTEIRO); }
   | FLOAT   { $$ = novaExpr(criarNoFloat($1), TIPO_FLOAT); }
   | STRING  {
@@ -237,34 +333,54 @@ expr:
         TipoDado t = TIPO_DESCONHECIDO;
         if (s == NULL)
             erroSemantico("variavel '%s' usada antes de ser definida", $1);
+        else if (s->tipo == TIPO_FUNCAO)
+            erroSemantico("funcao '%s' usada sem chamada", $1);
         else
             t = s->tipo;
         $$ = novaExpr(criarNoId($1), t);
         free($1);
     }
-  | expr PLUS expr   { $$ = novaExpr(criarNoOp('+', $1.no, $3.no), tipoAritmetico('+', $1.tipo, $3.tipo)); }
-  | expr MINUS expr  { $$ = novaExpr(criarNoOp('-', $1.no, $3.no), tipoAritmetico('-', $1.tipo, $3.tipo)); }
-  | expr TIMES expr  { $$ = novaExpr(criarNoOp('*', $1.no, $3.no), tipoAritmetico('*', $1.tipo, $3.tipo)); }
-  | expr DIVIDE expr { $$ = novaExpr(criarNoOp('/', $1.no, $3.no), tipoAritmetico('/', $1.tipo, $3.tipo)); }
-  | expr EQ expr { $$ = novaExpr(criarNoComp("==", $1.no, $3.no), tipoComparacao("==", $1.tipo, $3.tipo)); }
-  | expr NEQ expr { $$ = novaExpr(criarNoComp("!=", $1.no, $3.no), tipoComparacao("!=", $1.tipo, $3.tipo)); }
-  | expr LT expr { $$ = novaExpr(criarNoComp("<", $1.no, $3.no), tipoComparacao("<", $1.tipo, $3.tipo)); }
-  | expr GT expr { $$ = novaExpr(criarNoComp(">", $1.no, $3.no), tipoComparacao(">", $1.tipo, $3.tipo)); }
-  | expr LEQ expr { $$ = novaExpr(criarNoComp("<=", $1.no, $3.no), tipoComparacao("<=", $1.tipo, $3.tipo)); }
-  | expr GEQ expr { $$ = novaExpr(criarNoComp(">=", $1.no, $3.no), tipoComparacao(">=", $1.tipo, $3.tipo)); }
-  | LPAREN expr RPAREN { $$ = $2; }
+  | IDENTIFIER LPAREN lista_argumentos RPAREN {
+        $$ = novaExpr(montarChamada($1, $3), TIPO_INTEIRO);
+    }
+  | expressao PLUS expressao   { $$ = novaExpr(criarNoOp('+', $1.no, $3.no), tipoAritmetico('+', $1.tipo, $3.tipo)); }
+  | expressao MINUS expressao  { $$ = novaExpr(criarNoOp('-', $1.no, $3.no), tipoAritmetico('-', $1.tipo, $3.tipo)); }
+  | expressao TIMES expressao  { $$ = novaExpr(criarNoOp('*', $1.no, $3.no), tipoAritmetico('*', $1.tipo, $3.tipo)); }
+  | expressao DIVIDE expressao { $$ = novaExpr(criarNoOp('/', $1.no, $3.no), tipoAritmetico('/', $1.tipo, $3.tipo)); }
+  | expressao EQ expressao { $$ = novaExpr(criarNoComp("==", $1.no, $3.no), tipoComparacao("==", $1.tipo, $3.tipo)); }
+  | expressao NEQ expressao { $$ = novaExpr(criarNoComp("!=", $1.no, $3.no), tipoComparacao("!=", $1.tipo, $3.tipo)); }
+  | expressao LT expressao { $$ = novaExpr(criarNoComp("<", $1.no, $3.no), tipoComparacao("<", $1.tipo, $3.tipo)); }
+  | expressao GT expressao { $$ = novaExpr(criarNoComp(">", $1.no, $3.no), tipoComparacao(">", $1.tipo, $3.tipo)); }
+  | expressao LEQ expressao { $$ = novaExpr(criarNoComp("<=", $1.no, $3.no), tipoComparacao("<=", $1.tipo, $3.tipo)); }
+  | expressao GEQ expressao { $$ = novaExpr(criarNoComp(">=", $1.no, $3.no), tipoComparacao(">=", $1.tipo, $3.tipo)); }
+  | LPAREN expressao RPAREN { $$ = $2; }
 ;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintatico: %s\n", s);
+    fprintf(stderr, "Erro sintatico na linha %d: %s\n", yylineno, s);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
     inicializarTabela();
 
+    if (argc >= 2) {
+        yyin = fopen(argv[1], "r");
+        if (!yyin) {
+            fprintf(stderr, "Erro: nao foi possivel abrir %s\n", argv[1]);
+            return 1;
+        }
+    }
+    if (argc >= 3) {
+        strncpy(arquivo_saida, argv[2], sizeof(arquivo_saida) - 1);
+        arquivo_saida[sizeof(arquivo_saida) - 1] = '\0';
+    }
+
     int resultado = yyparse();
+
+    if (argc >= 2 && yyin)
+        fclose(yyin);
 
     if (resultado == 0 && erros_semanticos == 0)
         imprimirTabela();

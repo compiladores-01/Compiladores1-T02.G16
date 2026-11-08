@@ -6,6 +6,7 @@ typedef enum {
     TIPO_FLOAT,
     TIPO_STRING,
     TIPO_BOOLEAN,
+    TIPO_FUNCAO,
     TIPO_DESCONHECIDO
 } TipoDado;
 

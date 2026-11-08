@@ -12,6 +12,7 @@ static NoAST *criarNo(ASTTipo tipo) {
 static void copiarTexto(char *destino, size_t tamanho, const char *origem) {
     if (!origem || tamanho == 0) return;
     strncpy(destino, origem, tamanho - 1);
+    destino[tamanho - 1] = '\0';
 }
 
 NoAST *criarNoNum(int valor) {
@@ -19,6 +20,7 @@ NoAST *criarNoNum(int valor) {
     if (no) no->valor = valor;
     return no;
 }
+
 NoAST *criarNoFloat(double valor) {
     NoAST *no = criarNo(AST_FLOAT);
     if (no) no->valorFloat = valor;
@@ -52,6 +54,7 @@ NoAST *criarNoOp(char operador, NoAST *esquerda, NoAST *direita) {
     }
     return no;
 }
+
 NoAST *criarNoComp(const char *comparador, NoAST *esquerda, NoAST *direita) {
     NoAST *no = criarNo(AST_COMP);
     if (no) {
@@ -61,6 +64,7 @@ NoAST *criarNoComp(const char *comparador, NoAST *esquerda, NoAST *direita) {
     }
     return no;
 }
+
 NoAST *criarNoAtrib(NoAST *id, NoAST *expressao) {
     NoAST *no = criarNo(AST_ATRIB);
     if (no) {
@@ -76,6 +80,50 @@ NoAST *criarNoPrint(NoAST *expressao) {
     return no;
 }
 
+NoAST *criarNoIf(NoAST *condicao, NoAST *corpo, NoAST *alternativo) {
+    NoAST *no = criarNo(AST_IF);
+    if (no) {
+        no->esquerda = condicao;
+        no->direita = corpo;
+        no->alternativo = alternativo;
+    }
+    return no;
+}
+
+NoAST *criarNoWhile(NoAST *condicao, NoAST *corpo) {
+    NoAST *no = criarNo(AST_WHILE);
+    if (no) {
+        no->esquerda = condicao;
+        no->direita = corpo;
+    }
+    return no;
+}
+
+NoAST *criarNoFunc(const char *nome, NoAST *params, NoAST *corpo) {
+    NoAST *no = criarNo(AST_FUNC);
+    if (no) {
+        copiarTexto(no->nome, sizeof(no->nome), nome);
+        no->esquerda = params;
+        no->direita = corpo;
+    }
+    return no;
+}
+
+NoAST *criarNoReturn(NoAST *expressao) {
+    NoAST *no = criarNo(AST_RETURN);
+    if (no) no->esquerda = expressao;
+    return no;
+}
+
+NoAST *criarNoChamada(const char *nome, NoAST *args) {
+    NoAST *no = criarNo(AST_CHAMADA);
+    if (no) {
+        copiarTexto(no->nome, sizeof(no->nome), nome);
+        no->esquerda = args;
+    }
+    return no;
+}
+
 NoAST *criarNoListaCmd(NoAST *comando) {
     NoAST *no = criarNo(AST_LISTA_CMD);
     if (no) no->esquerda = comando;
@@ -88,14 +136,7 @@ NoAST *criarNoPrograma(NoAST *comandos) {
     return no;
 }
 
-static void imprimirLista(const NoAST *no) {
-    for (; no; no = no->proximo) {
-        if (no->esquerda) {
-            imprimirAST(no->esquerda);
-            printf("\n");
-        }
-    }
-}
+static void imprimirLista(const NoAST *no);
 
 void imprimirAST(const NoAST *raiz) {
     if (!raiz) return;
@@ -103,6 +144,12 @@ void imprimirAST(const NoAST *raiz) {
     switch (raiz->tipo) {
         case AST_NUM:
             printf("%d", raiz->valor);
+            break;
+        case AST_FLOAT:
+            printf("%g", raiz->valorFloat);
+            break;
+        case AST_BOOL:
+            printf("%s", raiz->valor ? "True" : "False");
             break;
         case AST_STRING:
             printf("%s", raiz->texto);
@@ -117,6 +164,13 @@ void imprimirAST(const NoAST *raiz) {
             imprimirAST(raiz->direita);
             printf(")");
             break;
+        case AST_COMP:
+            printf("(");
+            imprimirAST(raiz->esquerda);
+            printf(" %s ", raiz->comparador);
+            imprimirAST(raiz->direita);
+            printf(")");
+            break;
         case AST_ATRIB:
             imprimirAST(raiz->esquerda);
             printf(" = ");
@@ -127,25 +181,71 @@ void imprimirAST(const NoAST *raiz) {
             imprimirAST(raiz->esquerda);
             printf(")");
             break;
+        case AST_IF:
+            printf("if ");
+            imprimirAST(raiz->esquerda);
+            printf(":\n");
+            imprimirLista(raiz->direita);
+            if (raiz->alternativo) {
+                printf("else:\n");
+                imprimirLista(raiz->alternativo);
+            }
+            break;
+        case AST_WHILE:
+            printf("while ");
+            imprimirAST(raiz->esquerda);
+            printf(":\n");
+            imprimirLista(raiz->direita);
+            break;
+        case AST_FUNC:
+            printf("def %s(", raiz->nome);
+            {
+                int primeiro = 1;
+                for (const NoAST *p = raiz->esquerda; p; p = p->proximo) {
+                    if (!p->esquerda) continue;
+                    if (!primeiro) printf(", ");
+                    imprimirAST(p->esquerda);
+                    primeiro = 0;
+                }
+            }
+            printf("):\n");
+            imprimirLista(raiz->direita);
+            break;
+        case AST_RETURN:
+            printf("return");
+            if (raiz->esquerda) {
+                printf(" ");
+                imprimirAST(raiz->esquerda);
+            }
+            break;
+        case AST_CHAMADA:
+            printf("%s(", raiz->nome);
+            {
+                int primeiro = 1;
+                for (const NoAST *a = raiz->esquerda; a; a = a->proximo) {
+                    if (!a->esquerda) continue;
+                    if (!primeiro) printf(", ");
+                    imprimirAST(a->esquerda);
+                    primeiro = 0;
+                }
+            }
+            printf(")");
+            break;
         case AST_LISTA_CMD:
             imprimirLista(raiz);
             break;
         case AST_PROGRAMA:
             imprimirLista(raiz->esquerda);
             break;
-                    case AST_FLOAT:
-            printf("%g", raiz->valorFloat);
-            break;
-        case AST_BOOL:
-            printf("%s", raiz->valor ? "True" : "False");
-            break;
-        case AST_COMP:
-            printf("(");
-            imprimirAST(raiz->esquerda);
-            printf(" %s ", raiz->comparador);
-            imprimirAST(raiz->direita);
-            printf(")");
-            break;
+    }
+}
+
+static void imprimirLista(const NoAST *no) {
+    for (; no; no = no->proximo) {
+        if (no->esquerda) {
+            imprimirAST(no->esquerda);
+            printf("\n");
+        }
     }
 }
 
@@ -153,6 +253,7 @@ void liberarAST(NoAST *raiz) {
     if (!raiz) return;
     liberarAST(raiz->esquerda);
     liberarAST(raiz->direita);
+    liberarAST(raiz->alternativo);
     liberarAST(raiz->proximo);
     free(raiz);
 }
