@@ -139,13 +139,15 @@ Os testes da pasta `tests/ast/` verificam a impressão da Árvore Sintática Abs
 
 ## Testes da Tabela de Símbolos
 
-Os testes da pasta `tests/tabela/` verificam o comportamento da Tabela de Símbolos.
+Os testes da pasta `tests/tabela/` verificam o comportamento da Tabela de Símbolos e da Análise Semântica.
 
 | Teste | Status | O que verifica |
 |-------|--------|----------------|
 | `tabela/insercao` |  OK | Inserção de variáveis (int, float, string) |
 | `tabela/busca` |  OK | Busca e inferência de tipos |
-| `tabela/redeclaracao` |  Limitação | O compilador não detecta redeclaração; ele apenas sobrescreve. |
+| `tabela/erro_tipo` |  OK | Barra atribuição de tipos incompatíveis (ex: `x = 10; x = "texto";`) |
+| `tabela/nao_declarada` |  OK | Barra o uso de variável antes da definição (ex: `y = x + 5` sem declarar `x`) |
+| `tabela/redeclaracao` |  Comportamento esperado | Em Python, `x = 10; x = 20;` é reatribuição válida, não um erro. O erro real de tipo é testado em `erro_tipo/`. |
 
 ## Próximos passos
 
