@@ -16,7 +16,10 @@ typedef enum {
     AST_LISTA_CMD,
     AST_PROGRAMA,
     AST_IF,
-    AST_WHILE
+    AST_WHILE,
+    AST_FUNC,
+    AST_RETURN,
+    AST_CHAMADA
 } ASTTipo;
 
 typedef struct NoAST {
@@ -44,6 +47,9 @@ NoAST *criarNoAtrib(NoAST *id, NoAST *expressao);
 NoAST *criarNoPrint(NoAST *expressao);
 NoAST *criarNoIf(NoAST *condicao, NoAST *corpo, NoAST *alternativo);
 NoAST *criarNoWhile(NoAST *condicao, NoAST *corpo);
+NoAST *criarNoFunc(const char *nome, NoAST *params, NoAST *corpo);
+NoAST *criarNoReturn(NoAST *expressao);
+NoAST *criarNoChamada(const char *nome, NoAST *args);
 NoAST *criarNoListaCmd(NoAST *comando);
 NoAST *criarNoPrograma(NoAST *comandos);
 void imprimirAST(const NoAST *raiz);
