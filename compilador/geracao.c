@@ -13,7 +13,33 @@ typedef struct {
 
 static int usouConcatenacao = 0;
 
+/* Contexto de tipos: variaveis ja registradas, usadas por tipoDoNo() para
+ * descobrir o tipo de um identificador (AST_ID) dentro de expressoes. */
+static DeclaracaoVariavel *ctxGlobais = NULL;
+static int *ctxQtdGlobais = NULL;
+static DeclaracaoVariavel *ctxLocais = NULL;
+static int *ctxQtdLocais = NULL;
+static const NoAST *ctxParametros = NULL;
+
 static TipoDado tipoDoNo(const NoAST *no);
+static int ehParametro(const NoAST *parametros, const char *nome);
+static int mesmoNome(const char *a, const char *b);
+
+static TipoDado tipoDaVariavel(const char *nome) {
+    if (!nome) return TIPO_DESCONHECIDO;
+    /* parametros de funcao sao emitidos como int */
+    if (ctxParametros && ehParametro(ctxParametros, nome))
+        return TIPO_INTEIRO;
+    if (ctxLocais && ctxQtdLocais) {
+        for (int i = 0; i < *ctxQtdLocais; i++)
+            if (mesmoNome(ctxLocais[i].nome, nome)) return ctxLocais[i].tipo;
+    }
+    if (ctxGlobais && ctxQtdGlobais) {
+        for (int i = 0; i < *ctxQtdGlobais; i++)
+            if (mesmoNome(ctxGlobais[i].nome, nome)) return ctxGlobais[i].tipo;
+    }
+    return TIPO_DESCONHECIDO;
+}
 
 static int mesmoNome(const char *a, const char *b) {
     return a && b && strcmp(a, b) == 0;
@@ -54,7 +80,7 @@ static TipoDado tipoDoNo(const NoAST *no) {
         case AST_STRING:  return TIPO_STRING;
         case AST_COMP:    return TIPO_BOOLEAN;
         case AST_CHAMADA: return TIPO_INTEIRO;
-        case AST_ID:      return TIPO_DESCONHECIDO;
+        case AST_ID:      return tipoDaVariavel(no->nome);
         case AST_OP:
             if (no->operador == '/') return TIPO_FLOAT;
             if (no->operador == '+') {
@@ -304,6 +330,9 @@ static void emitirFuncao(FILE *saida, const NoAST *funcao) {
     DeclaracaoVariavel locais[MAX_VARIAVEIS];
     int quantidadeLocais = 0;
     TipoDado tipoRetorno = TIPO_DESCONHECIDO;
+    ctxLocais = locais;
+    ctxQtdLocais = &quantidadeLocais;
+    ctxParametros = funcao->esquerda;
     coletarVariaveis(funcao->direita, locais, &quantidadeLocais, funcao->esquerda);
     coletarTipoRetorno(funcao->direita, &tipoRetorno);
     if (tipoRetorno == TIPO_DESCONHECIDO)
@@ -323,6 +352,9 @@ static void emitirFuncao(FILE *saida, const NoAST *funcao) {
     emitirDeclaracoes(saida, locais, quantidadeLocais, 1);
     emitirListaComandos(saida, funcao->direita, 1);
     fputs("}\n\n", saida);
+    ctxLocais = NULL;
+    ctxQtdLocais = NULL;
+    ctxParametros = NULL;
 }
 
 static void marcarConcatenacao(const NoAST *no) {
@@ -346,13 +378,20 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
         return 1;
     }
 
-    usouConcatenacao = 0;
-    marcarConcatenacao(raiz);
-
     DeclaracaoVariavel globais[MAX_VARIAVEIS];
     int quantidadeGlobais = 0;
     const NoAST *comandos = (raiz->tipo == AST_PROGRAMA) ? raiz->esquerda : raiz;
+    ctxGlobais = globais;
+    ctxQtdGlobais = &quantidadeGlobais;
+    ctxLocais = NULL;
+    ctxQtdLocais = NULL;
+    ctxParametros = NULL;
     coletarVariaveis(comandos, globais, &quantidadeGlobais, NULL);
+
+    /* depois de coletar as variaveis, para reconhecer concatenacao entre
+     * variaveis string (ex.: s + t) */
+    usouConcatenacao = 0;
+    marcarConcatenacao(raiz);
 
     fputs("/* Gerado automaticamente pelo compilador Python -> C */\n", saida);
     fputs("#include <stdio.h>\n", saida);
@@ -385,6 +424,8 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
     fputs("}\n", saida);
 
     fclose(saida);
+    ctxGlobais = NULL;
+    ctxQtdGlobais = NULL;
     printf("Codigo C gerado em %s\n", arquivo);
     return 0;
 }
