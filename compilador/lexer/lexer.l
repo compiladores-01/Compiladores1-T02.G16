@@ -14,6 +14,24 @@ static char *copiarLexema(const char *texto) {
     return copia;
 }
 
+/* Converte uma string Python com aspas simples ('abc') para aspas duplas
+ * ("abc"), que e a unica forma de texto em C. Aspas duplas que estavam
+ * dentro do texto viram \" para nao fechar a string C antes da hora. */
+static char *converterAspasSimples(const char *texto) {
+    size_t n = strlen(texto);
+    char *r = (char *)malloc(2 * n + 1);
+    if (!r) { perror("malloc"); exit(1); }
+    size_t j = 0;
+    r[j++] = '"';
+    for (size_t i = 1; i + 1 < n; i++) {
+        if (texto[i] == '"') r[j++] = '\\';
+        r[j++] = texto[i];
+    }
+    r[j++] = '"';
+    r[j] = '\0';
+    return r;
+}
+
 static int pilha_indent[MAX_INDENTACAO];
 static int topo_indent = 0;
 
@@ -130,8 +148,13 @@ static void aplicar_indentacao(int nivel) {
 "/"             { return DIVIDE; }
 [0-9]+\.[0-9]+  { yylval.real = atof(yytext); return FLOAT; }
 [0-9]+          { yylval.inteiro = atoi(yytext); return NUMBER; }
-\"[^\"]*\"      { yylval.texto = copiarLexema(yytext); return STRING; }
-'[^']*'         { yylval.texto = copiarLexema(yytext); return STRING; }
+\"[^\"\n]*\"    { yylval.texto = copiarLexema(yytext); return STRING; }
+'[^'\n]*'       { yylval.texto = converterAspasSimples(yytext); return STRING; }
+ /* String sem aspa de fechamento ate o fim da linha. Para "abc" a regra de
+  * cima casa um caractere a mais (a aspa final) e vence pela regra do
+  * casamento mais longo; esta so vale quando a aspa nunca fecha. */
+\"[^\"\n]*      { fprintf(stderr, "Erro lexico: string nao terminada na linha %d\n", yylineno); }
+'[^'\n]*        { fprintf(stderr, "Erro lexico: string nao terminada na linha %d\n", yylineno); }
 #.*             { }
 
 [ \t]+          { }
