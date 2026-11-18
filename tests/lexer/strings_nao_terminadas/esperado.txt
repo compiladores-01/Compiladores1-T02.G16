@@ -1,1 +1,4 @@
-Erro léxico: string não terminada
+PRINT
+LPAREN
+Erro lexico: string nao terminada na linha 1
+NEWLINE

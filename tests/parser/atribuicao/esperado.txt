@@ -1,1 +1,5 @@
-OK
+x = 10
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+x               | INTEIRO | escopo 0
+-----

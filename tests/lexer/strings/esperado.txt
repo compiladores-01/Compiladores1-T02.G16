@@ -1,3 +1,6 @@
 STRING("hello")
+NEWLINE
 STRING('hello')
+NEWLINE
 STRING("string com espaços")
+NEWLINE

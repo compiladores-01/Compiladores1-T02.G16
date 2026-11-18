@@ -1,1 +1,9 @@
-OK
+x = 0
+while (x < 3):
+x = (x + 1)
+
+print(x)
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+x               | INTEIRO | escopo 0
+-----

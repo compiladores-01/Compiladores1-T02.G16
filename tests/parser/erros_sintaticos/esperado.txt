@@ -1,1 +1,1 @@
-Erro sintático
+Erro sintatico na linha 2: syntax error
