@@ -1,8 +1,5 @@
-Programa
-`-- Atribuicao
-    |-- Identificador: x
-    `-- Operador: +
-        |-- Numero: 1
-        `-- Operador: *
-            |-- Numero: 2
-            `-- Numero: 3
+x = (1 + (2 * 3))
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+x               | INTEIRO | escopo 0
+-----

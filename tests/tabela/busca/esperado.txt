@@ -1,6 +1,7 @@
 x = 10
 y = (x + 5)
+Codigo C gerado em saida.c
 TABELA DE SIMBOLOS
-x               | INTEIRO
-y               | INTEIRO
+x               | INTEIRO | escopo 0
+y               | INTEIRO | escopo 0
 -----

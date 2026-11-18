@@ -1,1 +1,5 @@
-OK
+print(1)
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+Tabela vazia.
+-----

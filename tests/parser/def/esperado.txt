@@ -1,0 +1,10 @@
+def dobro(n):
+return (n * 2)
+
+y = dobro(4)
+print(y)
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+dobro           | FUNCAO | escopo 0
+y               | INTEIRO | escopo 0
+-----
