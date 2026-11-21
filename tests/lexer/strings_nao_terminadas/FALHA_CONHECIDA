@@ -1,0 +1,1 @@
+O lexer ainda nao detecta string sem aspas de fechamento (trata a aspa como caractere invalido).

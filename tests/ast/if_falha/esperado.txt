@@ -1,8 +1,0 @@
-Programa
-`-- If
-    |-- Operador: >
-    |   |-- Identificador: x
-    |   `-- Numero: 5
-    `-- Bloco
-        `-- Print
-            `-- Numero: 1

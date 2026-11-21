@@ -1,8 +1,9 @@
 a = 10
 b = 2.5
 c = "texto"
+Codigo C gerado em saida.c
 TABELA DE SIMBOLOS
-a               | INTEIRO
-b               | FLOAT
-c               | STRING
+a               | INTEIRO | escopo 0
+b               | FLOAT | escopo 0
+c               | STRING | escopo 0
 -----

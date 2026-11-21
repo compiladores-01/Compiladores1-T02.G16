@@ -1,8 +1,6 @@
-# ATENCAO: O compilador atual NAO detecta redeclaracao (limitação conhecida).
-# O esperado ideal seria: Erro semantico: variavel 'x' ja declarada.
-# A saída real atual é:
 x = 10
 x = 20
+Codigo C gerado em saida.c
 TABELA DE SIMBOLOS
-x               | INTEIRO
+x               | INTEIRO | escopo 0
 -----

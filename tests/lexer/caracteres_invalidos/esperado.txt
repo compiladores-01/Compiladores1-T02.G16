@@ -1,3 +1,6 @@
-IDENTIFIER(x) ATRIBUES NUMBER(10)
-Caractere inválido: @
+IDENTIFIER(x)
+ATRIBUES
+NUMBER(10)
+Caractere invalido na linha 1: @
 NUMBER(5)
+NEWLINE

@@ -1,1 +1,10 @@
-OK
+x = 7
+if (x > 5):
+print(1)
+else:
+print(0)
+
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+x               | INTEIRO | escopo 0
+-----

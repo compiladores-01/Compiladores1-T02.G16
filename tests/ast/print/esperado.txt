@@ -1,3 +1,5 @@
-Programa
-`-- Print
-    `-- String: ""hello""
+print("hello")
+Codigo C gerado em saida.c
+TABELA DE SIMBOLOS
+Tabela vazia.
+-----

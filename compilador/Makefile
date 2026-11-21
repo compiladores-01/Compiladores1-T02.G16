@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra
 
 TARGET = compilador-bin
 
-.PHONY: all clean
+.PHONY: all clean test
 
 all: $(TARGET)
 
@@ -35,5 +35,13 @@ tabela.o: tabela.c tabela.h tipos.h
 geracao.o: geracao.c geracao.h ast.h tipos.h
 	$(CC) $(CFLAGS) -c geracao.c -o $@
 
+# Programa auxiliar que roda so o lexer (usado pelos testes)
+test_lexer: test_lexer.c lex.yy.c parser.tab.h
+	$(CC) $(CFLAGS) -o $@ test_lexer.c lex.yy.c
+
+# Constroi tudo e roda a suite de testes
+test: $(TARGET) test_lexer
+	cd ../tests && bash run_tests.sh
+
 clean:
-	rm -f $(TARGET) *.o lex.yy.c parser.tab.c parser.tab.h parser.output saida.c
+	rm -f $(TARGET) test_lexer *.o lex.yy.c parser.tab.c parser.tab.h parser.output saida.c
