@@ -69,8 +69,8 @@ Se houver erro semântico, o código C não é gerado.
 
 O gerador percorre a AST e:
 
-1. declara no início de `main` todas as variáveis globais, com o tipo inferido (`int`, `double`, `const char *`);
-2. escreve cada função `def` como uma função C antes do `main`;
+1. declara as variáveis globais com o tipo inferido (`int`, `double`, `const char *`): no início do `main` ou, se alguma função lê a variável, fora do `main`, para a função enxergar;
+2. escreve cada função `def` como uma função C antes do `main`. O tipo de cada parâmetro é deduzido pelos argumentos das chamadas (`f("oi")` → `const char *`), e o tipo de retorno pelos `return`;
 3. traduz cada comando: `if`/`while` viram blocos C, e `print` vira `printf` com o formato do tipo (`%d`, `%g`, `%s`, ou `True`/`False` para booleanos);
 4. quando há concatenação de strings (`s + t`), inclui uma função auxiliar `concatenar()`.
 
@@ -78,7 +78,6 @@ O código C é gerado **diretamente a partir da AST**, sem uma representação i
 
 ## Limitações conhecidas
 
-- Parâmetros de funções são sempre tratados como `int` (o tipo de retorno é deduzido pelo `return`).
-- Concatenação de duas variáveis string declaradas **dentro** de uma função não é detectada.
+- Um parâmetro não pode receber tipos incompatíveis em chamadas diferentes (`f(1)` e `f("a")` é erro semântico). Inteiro e float no mesmo parâmetro viram `double`.
 - A impressão da AST na tela não indenta o conteúdo dos blocos (a estrutura está correta, só a visualização fica achatada).
 - Não há `for`, listas, classes nem `import`.
