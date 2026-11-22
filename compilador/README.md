@@ -43,7 +43,7 @@ Os parênteses mostram a estrutura da árvore: `2 * 3` fica mais embaixo, por is
 
 ### 1. Análise léxica (Flex)
 
-Reconhece palavras-chave (`if`, `else`, `while`, `def`, `return`, `print`, `True`, `False`), identificadores, números inteiros e reais, strings, operadores e comentários.
+Reconhece palavras-chave (`if`, `elif`, `else`, `while`, `def`, `return`, `print`, `and`, `or`, `not`, `True`, `False`), identificadores, números inteiros e reais, strings, operadores (incluindo `%`) e comentários.
 
 - **Indentação:** o lexer mantém uma pilha com os níveis de recuo. Quando uma linha tem mais recuo que a anterior, emite `INDENT`. Quando volta, emite um `DEDENT` para cada nível fechado. Assim o parser enxerga os blocos de Python como se fossem `{` e `}`.
 - **Strings:** aceita aspas duplas e simples. Aspas simples são convertidas para duplas (`'oi'` → `"oi"`), porque em C texto só existe com aspas duplas.
@@ -51,7 +51,12 @@ Reconhece palavras-chave (`if`, `else`, `while`, `def`, `return`, `print`, `True
 
 ### 2. Análise sintática (Bison)
 
-A gramática define programa, comandos (atribuição, `print`, `if`/`else`, `while`, `def`, `return`) e expressões. A precedência dos operadores é declarada com `%left` (`*` e `/` antes de `+` e `-`), e o *else* pendente é resolvido com `%nonassoc`. Cada regra constrói um nó da AST.
+A gramática define programa, comandos (atribuição, `print`, `if`/`elif`/`else`, `while`, `def`, `return`) e expressões. Cada regra constrói um nó da AST.
+
+- **Precedência**, declarada com `%left`/`%right`, igual à de Python, da menor para a maior: `or` < `and` < `not` < comparações < `+ -` < `* / %` < `-` unário. Por isso `not x == 3` é `not (x == 3)`.
+- **`elif`** vira um `if` dentro do `else`: `if a: ... elif b: ... else: ...` é o mesmo que `if a: ... else: (if b: ... else: ...)`. Aceita quantos `elif` forem necessários, sem nó novo na AST.
+- **Número negativo:** `-5` vira o literal `-5`; `-x` vira `(0 - x)`.
+- O *else* pendente é resolvido com `%nonassoc`.
 
 ### 3. Análise semântica e tabela de símbolos
 
@@ -71,13 +76,21 @@ O gerador percorre a AST e:
 
 1. declara as variáveis globais com o tipo inferido (`int`, `double`, `const char *`): no início do `main` ou, se alguma função lê a variável, fora do `main`, para a função enxergar;
 2. escreve cada função `def` como uma função C antes do `main`. O tipo de cada parâmetro é deduzido pelos argumentos das chamadas (`f("oi")` → `const char *`), e o tipo de retorno pelos `return`;
-3. traduz cada comando: `if`/`while` viram blocos C, e `print` vira `printf` com o formato do tipo (`%d`, `%g`, `%s`, ou `True`/`False` para booleanos);
-4. quando há concatenação de strings (`s + t`), inclui uma função auxiliar `concatenar()`.
+3. traduz cada comando: `if`/`while` viram blocos C, `and`/`or`/`not` viram `&&`/`||`/`!`, e `print` usa o formato do tipo (`%d`, `%s`, ou `True`/`False` para booleanos);
+4. inclui funções auxiliares só quando o programa precisa delas:
+   - `concatenar()` para `s + t` com strings;
+   - `py_resto()` para `%`, porque em C `-7 % 3` é `-1` e em Python é `2`;
+   - `py_print_float()` para imprimir float como o Python (`2.0`, `0.30000000000000004`, `1e+16`).
+
+Literais float são escritos no C com a menor quantidade de dígitos que representa o valor exato (`3.14159265` continua `3.14159265`).
 
 O código C é gerado **diretamente a partir da AST**, sem uma representação intermediária (TAC). Para o subconjunto escolhido, a AST já tem toda a informação necessária, e isso mantém o compilador menor e mais fácil de verificar.
 
 ## Limitações conhecidas
 
 - Um parâmetro não pode receber tipos incompatíveis em chamadas diferentes (`f(1)` e `f("a")` é erro semântico). Inteiro e float no mesmo parâmetro viram `double`.
+- Em C uma função tem um tipo só. Se `dobro(x)` é chamada com `3` e com `2.5`, `x` vira `double` e `dobro(3)` devolve `6.0` (Python devolveria `6`). O valor está certo, só o tipo muda.
+- `%` só entre inteiros; `and`/`or`/`not` e as condições de `if`/`while` exigem boolean (`if x:` com inteiro é erro).
+- `print` aceita um valor só.
 - A impressão da AST na tela não indenta o conteúdo dos blocos (a estrutura está correta, só a visualização fica achatada).
 - Não há `for`, listas, classes nem `import`.

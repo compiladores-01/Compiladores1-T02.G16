@@ -100,7 +100,7 @@ cd compilador
 make test
 ```
 
-A suíte roda **28 testes automáticos** (lexer, parser, AST, tabela de símbolos e geração de código) e mostra `[OK]` ou `[FALHA]` para cada um. Detalhes em [`tests/README.md`](tests/README.md).
+A suíte roda os testes automáticos de cada etapa (lexer, parser, AST, tabela de símbolos e geração de código) e mostra `[OK]` ou `[FALHA]` para cada um. Detalhes em [`tests/README.md`](tests/README.md).
 
 ---
 
@@ -108,17 +108,19 @@ A suíte roda **28 testes automáticos** (lexer, parser, AST, tabela de símbolo
 
 | Construção | Exemplo | Tradução em C |
 |---|---|---|
-| Inteiros, reais, strings, booleanos | `10`, `2.5`, `"oi"`, `'oi'`, `True` | `int`, `double`, `const char *`, `int` (1/0, impresso como `True`/`False`) |
-| Atribuição e expressões | `x = 1 + 2 * 3` | `x = (1 + (2 * 3));` |
+| Inteiros, reais, strings, booleanos | `10`, `-5`, `2.5`, `"oi"`, `'oi'`, `True` | `int`, `double`, `const char *`, `int` (1/0, impresso como `True`/`False`) |
+| Atribuição e expressões | `x = 1 + 2 * 3`, `-x` | `x = (1 + (2 * 3));` |
+| Resto da divisão | `-7 % 3` | função auxiliar `py_resto()`, com o sinal igual ao do Python (`2`) |
 | Comparações | `==` `!=` `<` `>` `<=` `>=` | mesmos operadores |
+| Operadores lógicos | `and`, `or`, `not` | `&&`, `\|\|`, `!` (mesma precedência do Python) |
 | Concatenação de strings | `s + " mundo"` | função auxiliar `concatenar()` |
-| `print` | `print(x)` | `printf` com o formato do tipo (`%d`, `%g`, `%s`) |
-| `if` / `else` | blocos por **indentação** | `if { } else { }` |
+| `print` | `print(x)` | `printf` com o formato do tipo; float impresso como o Python (`2.0`, `0.30000000000000004`) por `py_print_float()` |
+| `if` / `elif` / `else` | blocos por **indentação** | `if { } else { if ... }` |
 | `while` | blocos por **indentação** | `while { }` |
-| Funções | `def f(a, b):` / `return` | função C antes do `main` |
+| Funções | `def f(a, b):` / `return` | função C antes do `main`, com tipos de parâmetros e retorno deduzidos |
 | Comentários | `# ...` | ignorados |
 
-Fora do escopo: classes, listas, `for`, `import`, exceções.
+Fora do escopo: classes, listas, `for`, `import`, exceções, `print` com vários valores.
 
 ---
 
