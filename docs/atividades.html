@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Atividades semanais da disciplina ligadas ao compilador.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Atividades semanais | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html">Projeto</a>
+          <a href="planejamento.html">Planejamento</a>
+          <a href="sprints.html">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html" class="is-current">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html">Pontos</a>
+          <a href="tokens.html">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#como" class="is-current"><span>00</span> Como usar</a>
+          <a href="#semanas"><span>01</span> Semanas 1–10</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">ACOMPANHAMENTO <span>/</span> SEMANAS</p>
+            <h1>Atividades <em>semanais</em></h1>
+            <p class="report__lead">Cada semana do repositório da disciplina vira prática no compilador Python → C. Os checklists originais foram atualizados com o estado do código.</p>
+            <div class="metadata">
+              <p><span>Fonte</span>sergioaafreitas/COMP1</p>
+              <p><span>Semanas</span>1 a 10</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="como">
+            <p class="section-index">00 <span>/</span> DISCIPLINA</p>
+            <h2>Como usar as práticas</h2>
+            
+            <p>O repositório <a class="text-link" href="https://github.com/sergioaafreitas/COMP1">COMP1</a> traz um exemplo por semana. A equipe replica a ideia no próprio <code>compilador/</code>, em vez de entregar os exemplos isolados.</p>
+            <div class="code-block"><pre><code>git clone https://github.com/sergioaafreitas/COMP1.git
+cd "COMP1/semana 01/src"</code></pre></div>
+    
+          </section>
+
+          <section class="report-section report-section--last" id="semanas">
+            <p class="section-index">01 <span>/</span> DIÁRIO</p>
+            <h2>Relação com o compilador</h2>
+            <div class="accordion"><details><summary>Semana 1 — Hello Flex/Bison</summary><div class="accordion__body"><p><strong>Material:</strong> Glossário, guias de ambiente, compilador e interpretador, proposta do trabalho. Prática: hello.l / hello.y.</p><p><strong>No projeto G16:</strong> Ambiente configurado, Hello World compilando, subset Python → C confirmada.</p></div></details><details><summary>Semana 2 — Expressões regulares</summary><div class="accordion__body"><p><strong>Material:</strong> Guia de ERs no Flex; exemplo que reconhece números e operadores.</p><p><strong>No projeto G16:</strong> Tokens da subset esboçados em lexer.l; Makefile inspirado na prática.</p></div></details><details><summary>Semana 3 — Scanner</summary><div class="accordion__body"><p><strong>Material:</strong> scanner.l com if/while, ids, números, operadores e comentários C.</p><p><strong>No projeto G16:</strong> Adaptado para keywords Python, comentários # e tokens consumidos pelo Bison.</p></div></details><details><summary>Semana 4 — Parser inicial</summary><div class="accordion__body"><p><strong>Material:</strong> Expressões com precedência * / sobre + -.</p><p><strong>No projeto G16:</strong> parser.y da subset, precedência e Makefile integrando lexer + parser.</p></div></details><details><summary>Semana 5 — Erros sintáticos</summary><div class="accordion__body"><p><strong>Material:</strong> Recuperação via error até ;, yyerrok / yyclearin.</p><p><strong>No projeto G16:</strong> No Python usamos NEWLINE/INDENT em vez de ponto e vírgula. yyerror reporta a linha; recuperação completa ainda é melhoria.</p></div></details><details><summary>Semana 6 — AST e tabela</summary><div class="accordion__body"><p><strong>Material:</strong> ast.c, tabela.c e tipos.h a partir de expressões com identificadores.</p><p><strong>No projeto G16:</strong> Nós de stmt Python e tabela com escopos; base da semântica e do codegen. Marco P1.</p></div></details><details><summary>Semana 7 — Semântica</summary><div class="accordion__body"><p><strong>Material:</strong> Testes de variável não declarada, redeclaração e tipos.</p><p><strong>No projeto G16:</strong> Regras no parser.y; mensagens claras para demo P2. Suíte tests/ ainda pode crescer.</p></div></details><details><summary>Semana 8 — IR / TAC</summary><div class="accordion__body"><p><strong>Material:</strong> Protótipo de três endereços na disciplina.</p><p><strong>No projeto G16:</strong> A equipe optou por emitir C direto da AST, sem TAC no binário atual.</p></div></details><details><summary>Semana 9 — Otimização</summary><div class="accordion__body"><p><strong>Material:</strong> Constant folding sobre a AST.</p><p><strong>No projeto G16:</strong> Não está no gerador atual; documentada como melhoria.</p></div></details><details><summary>Semana 10 — Código final</summary><div class="accordion__body"><p><strong>Material:</strong> Exemplo Java mínimo → bitcode textual.</p><p><strong>No projeto G16:</strong> No nosso caso o alvo é C: percorrer AST e emitir saida.c, depois gcc.</p></div></details></div>
+          </section>
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

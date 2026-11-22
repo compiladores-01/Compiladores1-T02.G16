@@ -27,7 +27,7 @@ jobs:
           python-version: '3.x'
 
       - name: Instalar MkDocs
-        run: pip install -r docs/requirements.txt
+        run: pip install mkdocs
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5

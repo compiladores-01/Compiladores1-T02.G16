@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Metodologia, ferramentas, cronograma e planejamento das sprints.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Planejamento | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html">Projeto</a>
+          <a href="planejamento.html" class="is-current">Planejamento</a>
+          <a href="sprints.html">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html">Pontos</a>
+          <a href="tokens.html">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#metodologia" class="is-current"><span>00</span> Metodologia</a>
+          <a href="#ferramentas"><span>01</span> Ferramentas</a>
+          <a href="#cronograma"><span>02</span> Cronograma</a>
+          <a href="#sprints-mapa"><span>03</span> Mapa das sprints</a>
+          <a href="#bibliografia"><span>04</span> Bibliografia</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">PROCESSO <span>/</span> PLANEJAMENTO</p>
+            <h1>Planejamento do <em>semestre</em></h1>
+            <p class="report__lead">Metodologia PBL + Scrum, stack Flex/Bison, cronograma alinhado ao plano de ensino e mapa das sprints da equipe de três pessoas.</p>
+            <div class="metadata">
+              <p><span>Aulas</span>Segunda e quarta, 16h–17h50</p>
+              <p><span>Sala</span>I10</p>
+              <p><span>Sprints</span>0 a 6 · 7 realizadas</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="metodologia">
+            <p class="section-index">00 <span>/</span> PBL</p>
+            <h2>Metodologia</h2>
+            
+            <p>A disciplina combina aulas expositivas e Problem Based Learning. A equipe aplica o mesmo ciclo ao compilador Python → C.</p>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Dia</th><th>Tipo</th><th>Uso pela equipe</th></tr></thead>
+                <tbody>
+                  <tr><th>Segunda 16h–17h50</th><td>Teórica</td><td>Alinhar autômatos, GLC, semântica e geração ao design</td></tr>
+                  <tr><th>Quarta 16h–17h50</th><td>Prática / PBL</td><td>Implementar, integrar e testar incrementos</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Material: <a class="text-link" href="https://slides.cedis.tec.br/c/sergio-compiladores">slides CEDIS</a> · <a class="text-link" href="https://github.com/sergioaafreitas/COMP1">sergioaafreitas/COMP1</a>.</p>
+            <h3>Ritmo semanal</h3>
+            <ul class="document-list">
+              <li>Após a segunda: atualizar backlog com o tema teórico.</li>
+              <li>Quarta: coding session coletivo.</li>
+              <li>Até domingo: fechar PRs/issues e atualizar docs.</li>
+              <li>Antes de P1/P2/T: ensaio da apresentação.</li>
+            </ul>
+            <h3>Qualidade interna</h3>
+            <p>Código compilável a partir do README, subset documentada, exemplos <code>.py</code>/<code>.c</code> versionados e este site refletindo o estado real do repositório.</p>
+    
+          </section>
+
+          <section class="report-section" id="ferramentas">
+            <p class="section-index">01 <span>/</span> STACK</p>
+            <h2>Ferramentas</h2>
+            
+            <div class="technology-list">
+              <div><p class="tech-label">LÉXICO</p><h3>Flex</h3><p>Tokens, palavras-chave, literais, NEWLINE e indentação.</p></div>
+              <div><p class="tech-label">SINTAXE</p><h3>Bison</h3><p>GLC da subset, AST e checagens semânticas nas ações.</p></div>
+              <div><p class="tech-label">BACKEND</p><h3>GCC / Make</h3><p>Compila o compilador e o C gerado.</p></div>
+            </div>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Ferramenta</th><th>Uso</th></tr></thead>
+                <tbody>
+                  <tr><th>Git / GitHub</th><td>Versionamento, PRs e issues</td></tr>
+                  <tr><th>Este site</th><td>Documentação no layout do projeto (substitui o MkDocs na apresentação)</td></tr>
+                  <tr><th>Forms Office</th><td>Formulários P1 e P2 pelo líder</td></tr>
+                  <tr><th>Markdown</th><td>Fonte original das atas, sprints e decisões</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Ambiente recomendado: Linux ou WSL2. Alternativa no Windows: MSYS2 MinGW64.</p>
+    
+          </section>
+
+          <section class="report-section" id="cronograma">
+            <p class="section-index">02 <span>/</span> CALENDÁRIO</p>
+            <h2>Cronograma</h2>
+            
+            <div class="callout"><strong>Datas-chave</strong><p>P1 formulário 23/09 · P1 apresentação 28 e 30/09 · P2 formulário 04/11 · P2 apresentação 09 e 11/11 · Entrevista T 30/11 e 02/12/2026.</p></div>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Fase</th><th>Período</th><th>Foco</th><th>Marco</th></tr></thead>
+                <tbody>
+                  <tr><th>Fundação</th><td>10/08 – 26/08</td><td>Ambiente, subset, lexer</td><td>Scanner inicial</td></tr>
+                  <tr><th>Sintaxe</th><td>31/08 – 16/09</td><td>Parser, erros, AST</td><td>Front-end</td></tr>
+                  <tr><th>P1</th><td>23/09 – 30/09</td><td>Consolidação</td><td>Entrega P1</td></tr>
+                  <tr><th>Semântica</th><td>05/10 – 14/10</td><td>Tipos e escopos</td><td>Pipeline intermediário</td></tr>
+                  <tr><th>Código</th><td>19/10 – 28/10</td><td>Geração de C</td><td>Backend</td></tr>
+                  <tr><th>P2</th><td>04/11 – 11/11</td><td>Integração</td><td>Entrega P2</td></tr>
+                  <tr><th>Fechamento</th><td>16/11 – 25/11</td><td>Testes e docs</td><td>Compilador final</td></tr>
+                  <tr><th>T</th><td>30/11 – 02/12</td><td>Entrevista</td><td>Nota C + T</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Agosto: tokens e milestone M1. Setembro: gramática, <code>yyerror</code>, AST e P1. Outubro: semântica e emissão de C. Novembro: P2, polimento e T.</p>
+    
+          </section>
+
+          <section class="report-section" id="sprints-mapa">
+            <p class="section-index">03 <span>/</span> SCRUM</p>
+            <h2>Mapa das sprints da equipe</h2>
+            
+            <p>A equipe realizou 7 sprints organizadas em Scrum. Os objetivos planejados para as sprints já concluídas foram:</p>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Sprint</th><th>Objetivo planejado</th></tr></thead>
+                <tbody>
+                  <tr><th>Sprint 0</th><td>Organização, escopo e ambiente</td></tr>
+                  <tr><th>Sprint 1</th><td>Analisador Léxico</td></tr>
+                  <tr><th>Sprint 2</th><td>Analisador Sintático</td></tr>
+                  <tr><th>Sprint 3</th><td>P1 e início da análise semântica</td></tr>
+                  <tr><th>Sprint 4</th><td>AST e integração inicial</td></tr>
+                  <tr><th>Sprint 5</th><td>Análise Semântica</td></tr>
+                  <tr><th>Sprint 6</th><td>Geração de C</td></tr>
+                  <tr><th>Sprint 7</th><td>Testes, documentação e finalização</td></tr>
+                </tbody>
+              </table>
+            </div>
+    
+          </section>
+
+        
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

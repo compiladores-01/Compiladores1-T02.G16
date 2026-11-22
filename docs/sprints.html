@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Metodologia Scrum e registro das sprints do compilador.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Sprints | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html">Projeto</a>
+          <a href="planejamento.html">Planejamento</a>
+          <a href="sprints.html" class="is-current">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html">Pontos</a>
+          <a href="tokens.html">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#scrum" class="is-current"><span>00</span> Scrum</a>
+          <a href="#visao"><span>01</span> Visão geral</a>
+          <a href="#distribuicao"><span>02</span> Tarefas</a>
+          <a href="#github"><span>03</span> Fluxo GitHub</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">PROCESSO <span>/</span> SCRUM</p>
+            <h1>Sprints do <em>compilador</em></h1>
+            <p class="report__lead">Desenvolvimento em sprints semanais, com issues no GitHub, revisão por outro integrante e registro de objetivo, impedimentos e resultado.</p>
+            <div class="metadata">
+              <p><span>Método</span>Scrum</p>
+              <p><span>Reunião</span>Quarta-feira</p>
+              <p><span>Equipe</span>3 integrantes</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="scrum">
+            <p class="section-index">00 <span>/</span> MÉTODO</p>
+            <h2>Como a equipe trabalha</h2>
+            
+            <p>Cada sprint tem objetivo, tarefas, issues, acompanhamento, problemas e documentação. Antes da reunião de quarta, cada pessoa atualiza issues, commits e PRs.</p>
+            <p>A reunião verifica o feito, atrasos, impedimentos, progresso, próximas atividades, GitHub Project e decisões técnicas.</p>
+    
+          </section>
+
+          <section class="report-section" id="visao">
+            <p class="section-index">01 <span>/</span> MAPA</p>
+            <h2>Visão geral</h2>
+            
+            <p>As sprints acompanham o compilador da organização até a entrega: léxico, sintaxe, AST, P1, semântica, geração de C, integração, testes e docs.</p>
+    
+          </section>
+
+          
+
+          <section class="report-section" id="distribuicao">
+            <p class="section-index">02 <span>/</span> PAPÉIS</p>
+            <h2>Distribuição de tarefas</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Área</th><th>Fernanda</th><th>Manoel</th><th>Cauã</th></tr></thead>
+                <tbody>
+                  <tr><th>Lexer</th><td>Principal</td><td>Principal</td><td>Principal</td></tr>
+                  <tr><th>Parser</th><td>Principal</td><td>Principal</td><td>Principal</td></tr>
+                  <tr><th>AST / semântica / C</th><td>Principal</td><td>Principal</td><td>Principal</td></tr>
+                  <tr><th>Integração, testes e docs</th><td>Sim</td><td>Sim</td><td>Sim</td></tr>
+                </tbody>
+              </table>
+            </div>
+    
+          </section>
+
+          <section class="report-section report-section--last" id="github">
+            <p class="section-index">03 <span>/</span> GIT</p>
+            <h2>Fluxo no GitHub</h2>
+            
+            <div class="code-block"><pre><code>Issue → responsável → desenvolvimento → commit → PR → revisão → merge → issue fechada</code></pre></div>
+            <p>Nenhuma alteração importante entra na branch principal sem revisão de outro integrante.</p>
+    
+          </section>
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

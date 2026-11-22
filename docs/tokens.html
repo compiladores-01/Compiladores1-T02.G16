@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Referência dos tokens reconhecidos pelo analisador léxico.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Tokens | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html">Projeto</a>
+          <a href="planejamento.html">Planejamento</a>
+          <a href="sprints.html">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html">Pontos</a>
+          <a href="tokens.html" class="is-current">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#visao-geral" class="is-current"><span>00</span> Visão geral</a>
+          <a href="#palavras-chave"><span>01</span> Palavras-chave</a>
+          <a href="#operadores"><span>02</span> Operadores</a>
+          <a href="#delimitadores"><span>03</span> Delimitadores</a>
+          <a href="#literais"><span>04</span> Literais</a>
+          <a href="#identificadores"><span>05</span> Identificadores</a>
+          <a href="#indentacao"><span>06</span> Indentação</a>
+          <a href="#comentarios"><span>07</span> Comentários</a>
+          <a href="#invalidos"><span>08</span> Inválidos</a>
+          <a href="#bison"><span>09</span> Bison</a>
+          <a href="#resumo-tokens"><span>10</span> Resumo</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">REFERÊNCIA TÉCNICA <span>/</span> ANÁLISE LÉXICA</p>
+            <h1>Documentação dos <em>tokens</em></h1>
+            <p class="report__lead">Referência alinhada a compilador/lexer/lexer.l e parser/parser.y do grupo G16 — não ao rascunho antigo de PRs pendentes.</p>
+            <div class="metadata">
+              <p><span>Lexer</span>Flex</p>
+              <p><span>Parser</span>Bison</p>
+              <p><span>Arquivo</span>lexer/lexer.l</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="visao-geral">
+            <p class="section-index">00 <span>/</span> FUNDAMENTOS</p>
+            <h2>O que são tokens?</h2>
+            
+            <p>O analisador léxico lê o código caractere a caractere e devolve tokens para o Bison. O wrapper <code>yylex</code> drena uma fila usada para INDENT/DEDENT.</p>
+            <div class="code-block">
+              <div class="code-block__header"><span>PYTHON</span><span>entrada</span></div>
+              <pre><code>x = 10
+print(x)</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-block__header"><span>TOKENS</span><span>simplificado</span></div>
+              <pre><code>IDENTIFIER(x) ATRIBUES NUMBER(10) NEWLINE
+PRINT LPAREN IDENTIFIER(x) RPAREN NEWLINE</code></pre>
+            </div>
+    
+          </section>
+
+          <section class="report-section" id="palavras-chave">
+            <p class="section-index">01 <span>/</span> TOKENS</p>
+            <h2>Palavras-chave</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Token</th><th>Padrão</th><th>Exemplo</th></tr></thead>
+                <tbody>
+                  <tr><th><code>PRINT</code></th><td><code>"print"</code></td><td><code>print(x)</code></td></tr>
+                  <tr><th><code>IF</code></th><td><code>"if"</code></td><td><code>if n &gt; 4:</code></td></tr>
+                  <tr><th><code>ELSE</code></th><td><code>"else"</code></td><td><code>else:</code></td></tr>
+                  <tr><th><code>WHILE</code></th><td><code>"while"</code></td><td><code>while x &lt; 10:</code></td></tr>
+                  <tr><th><code>DEF</code></th><td><code>"def"</code></td><td><code>def soma(a, b):</code></td></tr>
+                  <tr><th><code>RETURN</code></th><td><code>"return"</code></td><td><code>return a + b</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout"><strong>Fora do escopo</strong><p><code>for</code>, <code>None</code>, <code>class</code> e <code>import</code> não são palavras-chave do lexer.</p></div>
+    
+          </section>
+
+          <section class="report-section" id="operadores">
+            <p class="section-index">02 <span>/</span> TOKENS</p>
+            <h2>Operadores</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Token</th><th>Padrão</th><th>Uso</th></tr></thead>
+                <tbody>
+                  <tr><th><code>ATRIBUES</code></th><td><code>=</code></td><td>Atribuição</td></tr>
+                  <tr><th><code>PLUS MINUS TIMES DIVIDE</code></th><td><code>+ - * /</code></td><td>Aritmética; <code>/</code> vira divisão real em C</td></tr>
+                  <tr><th><code>EQ NEQ</code></th><td><code>== !=</code></td><td>Igualdade</td></tr>
+                  <tr><th><code>LT GT LEQ GEQ</code></th><td><code>&lt; &gt; &lt;= &gt;=</code></td><td>Relacionais (nomes LEQ/GEQ no parser)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Precedência Bison: relacionais abaixo de <code>+</code>/<code>-</code>, que ficam abaixo de <code>*</code>/<code>/</code>.</p>
+    
+          </section>
+
+          <section class="report-section" id="delimitadores">
+            <p class="section-index">03 <span>/</span> TOKENS</p>
+            <h2>Delimitadores</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Token</th><th>Padrão</th><th>Papel</th></tr></thead>
+                <tbody>
+                  <tr><th><code>LPAREN</code> / <code>RPAREN</code></th><td><code>( )</code></td><td>Chamadas, print e agrupamento</td></tr>
+                  <tr><th><code>COLON</code></th><td><code>:</code></td><td>Cabeçalho de if, while e def</td></tr>
+                  <tr><th><code>COMMA</code></th><td><code>,</code></td><td>Parâmetros e argumentos</td></tr>
+                  <tr><th><code>NEWLINE</code></th><td>quebra de linha</td><td>Termina comando e entra no estado BOL</td></tr>
+                </tbody>
+              </table>
+            </div>
+    
+          </section>
+
+          <section class="report-section" id="literais">
+            <p class="section-index">04 <span>/</span> TOKENS</p>
+            <h2>Literais</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Token</th><th>Padrão</th><th>Valor semântico</th></tr></thead>
+                <tbody>
+                  <tr><th><code>NUMBER</code></th><td><code>[0-9]+</code></td><td><code>yylval.inteiro</code></td></tr>
+                  <tr><th><code>FLOAT</code></th><td><code>[0-9]+\.[0-9]+</code></td><td><code>yylval.real</code></td></tr>
+                  <tr><th><code>STRING</code></th><td>aspas simples ou duplas</td><td>lexema copiado, incluindo as aspas</td></tr>
+                  <tr><th><code>BOOLEAN</code></th><td><code>True</code>/<code>False</code></td><td>1 ou 0 em <code>yylval.inteiro</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout"><strong>Compatibilidade</strong><p>Identificadores <code>true</code> e <code>false</code> ainda viram BOOLEAN. O padrão Python oficial é <code>True</code>/<code>False</code>.</p></div>
+            <div class="callout callout--warning"><strong>Strings</strong><p>O lexer não trata escapes nem string não terminada com mensagem específica: aspas sem fechamento tendem a consumir o restante ou gerar caractere inválido.</p></div>
+    
+          </section>
+
+          <section class="report-section" id="identificadores">
+            <p class="section-index">05 <span>/</span> TOKENS</p>
+            <h2>Identificadores</h2>
+            
+            <p>Padrão <code>[a-zA-Z_][a-zA-Z0-9_]*</code>, depois das palavras-chave. O texto vai para <code>yylval.texto</code>.</p>
+            <ul class="document-list">
+              <li>Válidos: <code>x</code>, <code>soma</code>, <code>_var</code>.</li>
+              <li>Inválidos: <code>1var</code>, <code>var-nome</code>.</li>
+            </ul>
+    
+          </section>
+
+          <section class="report-section" id="indentacao">
+            <p class="section-index">06 <span>/</span> PYTHON</p>
+            <h2>INDENT, DEDENT e NEWLINE</h2>
+            
+            <p>No início de linha (estado <code>BOL</code>) o lexer mede espaços/tabs (tab = 4), compara com uma pilha e enfileira <code>INDENT</code> ou um ou mais <code>DEDENT</code>. Linhas vazias e comentários no BOL são ignorados. No EOF a indentação volta a zero.</p>
+            <div class="callout callout--warning"><strong>Erros</strong><p>Indentação inconsistente ou profunda demais é reportada em stderr, com o número da linha.</p></div>
+    
+          </section>
+
+          <section class="report-section" id="comentarios">
+            <p class="section-index">07 <span>/</span> IGNORADOS</p>
+            <h2>Comentários e espaços</h2>
+            
+            <p>Comentários <code>#...</code> e espaços/tabs no meio da linha não geram token. <code>\n</code> gera <code>NEWLINE</code> e volta ao estado BOL.</p>
+    
+          </section>
+
+          <section class="report-section" id="invalidos">
+            <p class="section-index">08 <span>/</span> ERROS</p>
+            <h2>Caracteres inválidos</h2>
+            
+            <p>A regra coringa imprime <code>Caractere invalido na linha N: ...</code> e continua, para reportar vários erros na mesma execução.</p>
+    
+          </section>
+
+          <section class="report-section" id="bison">
+            <p class="section-index">09 <span>/</span> INTEGRAÇÃO</p>
+            <h2>Integração com o Bison</h2>
+            
+            <p>Tokens declarados em <code>parser.y</code> com <code>%token</code>. Fluxo: Python → Flex → tokens → Bison → AST → semântica → <code>gerarCodigoC</code>.</p>
+            <div class="code-block"><pre><code>%token PRINT IF ELSE WHILE DEF RETURN
+%token COLON NEWLINE COMMA INDENT DEDENT
+%token PLUS MINUS TIMES DIVIDE
+%token EQ NEQ LEQ GEQ LT GT ATRIBUES</code></pre></div>
+    
+          </section>
+
+          <section class="report-section report-section--last" id="resumo-tokens">
+            <p class="section-index">10 <span>/</span> REFERÊNCIA</p>
+            <h2>Resumo</h2>
+            
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Categoria</th><th>Tokens</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><th>Keywords</th><td>PRINT IF ELSE WHILE DEF RETURN</td><td>No lexer</td></tr>
+                  <tr><th>Aritmética</th><td>ATRIBUES PLUS MINUS TIMES DIVIDE</td><td>No lexer</td></tr>
+                  <tr><th>Relacionais</th><td>EQ NEQ LT GT LEQ GEQ</td><td>No lexer</td></tr>
+                  <tr><th>Estrutura</th><td>LPAREN RPAREN COLON COMMA NEWLINE INDENT DEDENT</td><td>No lexer</td></tr>
+                  <tr><th>Literais</th><td>NUMBER FLOAT STRING BOOLEAN IDENTIFIER</td><td>No lexer</td></tr>
+                  <tr><th>Fora do escopo</th><td>FOR NONE listas dicionários</td><td>Não implementado</td></tr>
+                </tbody>
+              </table>
+            </div>
+    
+          </section>
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Documentação do compilador Python para C da disciplina FGA0003 Compiladores 1.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Projeto | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html" class="is-current">Projeto</a>
+          <a href="planejamento.html">Planejamento</a>
+          <a href="sprints.html">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html">Pontos</a>
+          <a href="tokens.html">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#projeto" class="is-current"><span>00</span> Sobre o projeto</a>
+          <a href="#equipe"><span>01</span> Equipe</a>
+          <a href="#pipeline"><span>02</span> Pipeline</a>
+          <a href="#executar"><span>03</span> Como executar</a>
+          <a href="#estado"><span>04</span> Estado atual</a>
+          <a href="#documentacao"><span>05</span> Documentação</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">FGA0003 <span>/</span> T02 · G16</p>
+            <h1>Compilador <em>Python → C</em></h1>
+            <p class="report__lead">Documentação do tradutor de um subconjunto de Python para C, desenvolvido com Flex e Bison na disciplina Compiladores 1 (2026/2).</p>
+            <div class="metadata">
+              <p><span>Curso</span>Engenharia de Software · FCTE / UnB</p>
+              <p><span>Professor</span>Dr. Sergio Antônio Andrade de Freitas</p>
+              <p><span>Equipe</span>3 integrantes · turma T02 · Scrum</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="projeto">
+            <p class="section-index">00 <span>/</span> INTRODUÇÃO</p>
+            <h2>Sobre o projeto</h2>
+            
+            <div class="hero-logos"><img src="assets/img/python-c.jpg" alt="Logos de Python e C"></div>
+            <p>A disciplina aborda os princípios da construção de compiladores e o processamento de linguagens. Como aplicação prática, a equipe constrói um compilador de um subconjunto de Python para C, com análise léxica (Flex), análise sintática (Bison), AST, tabela de símbolos, checagens semânticas e geração de código C.</p>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Atributo</th><th>Detalhes</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Curso</th><td>Engenharia de Software (FCTE — UnB)</td></tr>
+                  <tr><th scope="row">Turma</th><td>T02 · grupo G16</td></tr>
+                  <tr><th scope="row">Carga horária</th><td>60 horas</td></tr>
+                  <tr><th scope="row">Professor</th><td>Dr. Sergio Antônio Andrade de Freitas</td></tr>
+                  <tr><th scope="row">Alvo</th><td>Traduzir um subconjunto de Python para C</td></tr>
+                  <tr><th scope="row">Ferramentas</th><td>Flex, Bison, GCC e Make</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <a class="external-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">github.com/compiladores-01/Compiladores1-T02.G16</a>
+    
+          </section>
+
+          <section class="report-section" id="equipe">
+            <p class="section-index">01 <span>/</span> PESSOAS</p>
+            <h2>Membros da equipe</h2>
+            
+            <div class="team-grid">
+              <div class="team-card"><span>221007715</span><h3>Fernanda Vaz</h3><p>Léxico, integração e documentação.</p></div>
+              <div class="team-card"><span>200023535</span><h3>Manoel Castro</h3><p>Parser, gramática e erros sintáticos.</p></div>
+              <div class="team-card"><span>222006623</span><h3>Cauã Clemente</h3><p>AST, semântica e geração de C.</p></div>
+            </div>
+            <p>A equipe tem três integrantes. Papéis rotacionam nas sprints. Reuniões semanais às quartas, alinhadas às aulas práticas da disciplina.</p>
+    
+          </section>
+
+          <section class="report-section" id="pipeline">
+            <p class="section-index">02 <span>/</span> ARQUITETURA</p>
+            <h2>Pipeline do compilador</h2>
+            
+            <p>O fluxo implementado no repositório percorre o programa Python até um arquivo C compilável pelo GCC. A geração é feita a partir da AST, com checagens semânticas no parser.</p>
+            <div class="pipeline">
+              <div><strong>.py</strong><span>entrada</span></div>
+              <div><strong>Flex</strong><span>tokens</span></div>
+              <div><strong>Bison</strong><span>gramática</span></div>
+              <div><strong>AST</strong><span>árvore</span></div>
+              <div><strong>Semântica</strong><span>tipos / escopo</span></div>
+              <div><strong>Codegen</strong><span>emissão C</span></div>
+              <div><strong>.c + gcc</strong><span>saída</span></div>
+            </div>
+            <div class="code-block">
+              <div class="code-block__header"><span>PIPELINE</span><span>compilador/</span></div>
+              <pre><code>programa.py → Flex → tokens → Bison → AST → análise semântica → código C</code></pre>
+            </div>
+            <p>Arquivos centrais: <code>lexer/lexer.l</code>, <code>parser/parser.y</code>, <code>ast.c</code>, <code>tabela.c</code> e <code>geracao.c</code>.</p>
+    
+          </section>
+
+          <section class="report-section" id="executar">
+            <p class="section-index">03 <span>/</span> USO</p>
+            <h2>Como executar</h2>
+            
+            <p>É necessário ter Flex, Bison, GCC e Make. No Linux/WSL:</p>
+            <div class="code-block">
+              <div class="code-block__header"><span>BASH</span><span>dependências</span></div>
+              <pre><code>sudo apt-get update
+sudo apt-get install flex bison build-essential</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-block__header"><span>BASH</span><span>compilar e rodar</span></div>
+              <pre><code>git clone https://github.com/compiladores-01/Compiladores1-T02.G16.git
+cd -FGA0003Compiladores1-T02.G16/compilador
+make
+./compilador-bin entrada.py saida.c
+gcc saida.c -o saida_prog
+./saida_prog</code></pre>
+            </div>
+            <p>No Windows, use WSL2 ou MSYS2 MinGW64. O exemplo <code>entrada.py</code> cobre <code>while</code>, função <code>def</code>, <code>if/else</code> e <code>print</code>.</p>
+    
+          </section>
+
+          <section class="report-section" id="estado">
+            <p class="section-index">04 <span>/</span> STATUS</p>
+            <h2>Estado atual</h2>
+            
+            <p>Após a realização de 7 sprints, o compilador implementa os analisadores léxico e sintático, a AST, a tabela de símbolos, a análise semântica completa e a geração de código C. A equipe também passou a contar com uma suíte abrangente de testes.</p>
+            <ul class="status-list">
+              <li><span class="badge">PRONTO</span>Tokens, indentação INDENT/DEDENT, operadores relacionais e palavras-chave <code>def</code>/<code>return</code></li>
+              <li><span class="badge">PRONTO</span>Parser com blocos por indentação, AST e tabela de símbolos com escopos</li>
+              <li><span class="badge">PRONTO</span>Checagens de tipo, variável não definida, <code>return</code> fora de função e funções aninhadas</li>
+              <li><span class="badge">PRONTO</span>Emissão de C com <code>printf</code>, <code>if/else</code>, <code>while</code> e funções</li>
+              <li><span class="badge">TESTADO</span>Casos para lexer, parser, AST, tabela de símbolos e barreiras de tipos</li>
+            </ul>
+    
+          </section>
+
+          <section class="report-section report-section--last" id="documentacao">
+            <p class="section-index">05 <span>/</span> ÍNDICE</p>
+            <h2>Documentação do projeto</h2>
+            
+            <p>Todo o material de MkDocs foi trazido para este layout e atualizado conforme o código do repositório do compilador.</p>
+            <div class="doc-grid">
+              <a class="doc-card" href="planejamento.html"><span>03</span><strong>Planejamento</strong><p>Metodologia, ferramentas, cronograma e mapa das sprints.</p></a>
+              <a class="doc-card" href="sprints.html"><span>04</span><strong>Sprints</strong><p>Histórico Scrum, da organização até a finalização.</p></a>
+              <a class="doc-card" href="atas.html"><span>05</span><strong>Atas</strong><p>Registros das reuniões e mudanças de linguagem.</p></a>
+              <a class="doc-card" href="atividades.html"><span>06</span><strong>Atividades semanais</strong><p>Práticas da disciplina ligadas ao compilador.</p></a>
+              <a class="doc-card" href="decisoes.html"><span>07</span><strong>Decisões técnicas</strong><p>Justificativas de arquitetura e design.</p></a>
+              <a class="doc-card" href="problemas.html"><span>08</span><strong>Problemas e soluções</strong><p>Impedimentos reais encontrados no código.</p></a>
+              <a class="doc-card" href="pontos.html"><span>09</span><strong>Pontos de controle</strong><p>Checklists de P1 e P2.</p></a>
+              <a class="doc-card" href="tokens.html"><span>10</span><strong>Tokens</strong><p>Referência do analisador léxico atualizado.</p></a>
+            </div>
+    
+          </section>
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
