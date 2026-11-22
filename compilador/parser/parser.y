@@ -80,6 +80,12 @@ static TipoDado tipoAritmetico(char op, TipoDado a, TipoDado b) {
     if (op == '+' && a == TIPO_STRING && b == TIPO_STRING)
         return TIPO_STRING;
 
+    if (op == '%') {
+        if (a == TIPO_INTEIRO && b == TIPO_INTEIRO) return TIPO_INTEIRO;
+        erroSemantico("operador '%%' so e suportado entre inteiros (recebeu %s e %s)", nomeTipo(a), nomeTipo(b));
+        return TIPO_DESCONHECIDO;
+    }
+
     if (ehNumerico(a) && ehNumerico(b)) {
         if (op == '/') return TIPO_FLOAT;   /* '/' de Python e divisao real */
         return (a == TIPO_FLOAT || b == TIPO_FLOAT) ? TIPO_FLOAT : TIPO_INTEIRO;
@@ -87,6 +93,14 @@ static TipoDado tipoAritmetico(char op, TipoDado a, TipoDado b) {
 
     erroSemantico("operador '%c' invalido entre %s e %s", op, nomeTipo(a), nomeTipo(b));
     return TIPO_DESCONHECIDO;
+}
+
+/* Operadores logicos (and, or, not): os operandos precisam ser boolean,
+   como as condicoes do if/while. */
+static TipoDado tipoLogico(const char *op, TipoDado t) {
+    if (t != TIPO_BOOLEAN && t != TIPO_DESCONHECIDO)
+        erroSemantico("operador '%s' exige boolean, mas recebeu %s", op, nomeTipo(t));
+    return TIPO_BOOLEAN;
 }
 
 /* Comparacoes: numero com numero, ou dois operandos do mesmo tipo. */
@@ -165,25 +179,31 @@ static NoAST *montarChamada(char *nome, NoAST *argumentos) {
 %token <texto> IDENTIFIER STRING
 %token <inteiro> NUMBER BOOLEAN
 %token <real> FLOAT
-%token PRINT IF ELSE WHILE DEF RETURN
+%token PRINT IF ELSE ELIF WHILE DEF RETURN
+%token AND OR NOT
 %token COLON NEWLINE COMMA
 %token INDENT DEDENT
 %token LPAREN RPAREN
-%token PLUS MINUS TIMES DIVIDE
+%token PLUS MINUS TIMES DIVIDE MOD
 %token EQ NEQ LEQ GEQ LT GT ATRIBUES
 
 %type <no> lista_comandos comando atribuicao comando_print
-%type <no> comando_if comando_while bloco
+%type <no> comando_if cauda_if comando_while bloco
 %type <no> definicao_funcao comando_return
 %type <no> lista_parametros parametros lista_argumentos argumentos
 %type <expr> expressao
 
+/* Precedencia, da menor para a maior (igual a de Python) */
+%left OR
+%left AND
+%right NOT
 %left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
+%right MENOS_UNARIO
 
 %nonassoc MENOR_QUE_ELSE
-%nonassoc ELSE
+%nonassoc ELSE ELIF
 
 %%
 
@@ -251,13 +271,21 @@ comando_return:
 ;
 
 comando_if:
-    IF expressao COLON bloco %prec MENOR_QUE_ELSE {
+    IF expressao COLON bloco cauda_if {
         verificarCondicao("if", $2.tipo);
-        $$ = criarNoIf($2.no, $4, NULL);
+        $$ = criarNoIf($2.no, $4, $5);
     }
-  | IF expressao COLON bloco ELSE COLON bloco {
-        verificarCondicao("if", $2.tipo);
-        $$ = criarNoIf($2.no, $4, $7);
+;
+
+/* O que vem depois do bloco do if: nada, um else, ou um elif.
+   'elif' vira um if dentro do else: if a: ... elif b: ... else: ...
+   e o mesmo que if a: ... else: (if b: ... else: ...) */
+cauda_if:
+    /* vazio */ %prec MENOR_QUE_ELSE { $$ = NULL; }
+  | ELSE COLON bloco { $$ = $3; }
+  | ELIF expressao COLON bloco cauda_if {
+        verificarCondicao("elif", $2.tipo);
+        $$ = criarNoListaCmd(criarNoIf($2.no, $4, $5));
     }
 ;
 
@@ -357,6 +385,35 @@ expressao:
   | expressao MINUS expressao  { $$ = novaExpr(criarNoOp('-', $1.no, $3.no), tipoAritmetico('-', $1.tipo, $3.tipo)); }
   | expressao TIMES expressao  { $$ = novaExpr(criarNoOp('*', $1.no, $3.no), tipoAritmetico('*', $1.tipo, $3.tipo)); }
   | expressao DIVIDE expressao { $$ = novaExpr(criarNoOp('/', $1.no, $3.no), tipoAritmetico('/', $1.tipo, $3.tipo)); }
+  | expressao MOD expressao    { $$ = novaExpr(criarNoOp('%', $1.no, $3.no), tipoAritmetico('%', $1.tipo, $3.tipo)); }
+  | MINUS expressao %prec MENOS_UNARIO {
+        if (!ehNumerico($2.tipo) && $2.tipo != TIPO_DESCONHECIDO)
+            erroSemantico("operador '-' invalido para %s", nomeTipo($2.tipo));
+        /* -5 vira o literal -5; -x vira (0 - x) */
+        if ($2.no && $2.no->tipo == AST_NUM) {
+            $2.no->valor = -$2.no->valor;
+            $$ = $2;
+        } else if ($2.no && $2.no->tipo == AST_FLOAT) {
+            $2.no->valorFloat = -$2.no->valorFloat;
+            $$ = $2;
+        } else {
+            $$ = novaExpr(criarNoOp('-', criarNoNum(0), $2.no), $2.tipo);
+        }
+    }
+  | expressao AND expressao {
+        tipoLogico("and", $1.tipo);
+        tipoLogico("and", $3.tipo);
+        $$ = novaExpr(criarNoComp("&&", $1.no, $3.no), TIPO_BOOLEAN);
+    }
+  | expressao OR expressao {
+        tipoLogico("or", $1.tipo);
+        tipoLogico("or", $3.tipo);
+        $$ = novaExpr(criarNoComp("||", $1.no, $3.no), TIPO_BOOLEAN);
+    }
+  | NOT expressao {
+        tipoLogico("not", $2.tipo);
+        $$ = novaExpr(criarNoComp("!", NULL, $2.no), TIPO_BOOLEAN);
+    }
   | expressao EQ expressao { $$ = novaExpr(criarNoComp("==", $1.no, $3.no), tipoComparacao("==", $1.tipo, $3.tipo)); }
   | expressao NEQ expressao { $$ = novaExpr(criarNoComp("!=", $1.no, $3.no), tipoComparacao("!=", $1.tipo, $3.tipo)); }
   | expressao LT expressao { $$ = novaExpr(criarNoComp("<", $1.no, $3.no), tipoComparacao("<", $1.tipo, $3.tipo)); }

@@ -1,0 +1,6 @@
+negativo
+zero
+pequeno
+grande
+2
+3

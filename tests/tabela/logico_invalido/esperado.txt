@@ -1,0 +1,2 @@
+Erro semantico: operador 'and' exige boolean, mas recebeu inteiro
+Erro semantico: operador 'and' exige boolean, mas recebeu inteiro
