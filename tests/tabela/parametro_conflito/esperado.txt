@@ -1,0 +1,6 @@
+Erro semantico: funcao 'f' recebe tipos incompativeis no mesmo parametro (inteiro e string)
+def f(x):
+return x
+
+print(f(1))
+print(f("a"))

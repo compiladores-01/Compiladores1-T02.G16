@@ -120,6 +120,13 @@ static void atribuir(const char *nome, TipoDado t) {
         return;
     }
 
+    /* variavel que recebeu o resultado de uma funcao (tipo ainda
+       desconhecido): passa a ter o tipo do novo valor */
+    if (s->tipo == TIPO_DESCONHECIDO) {
+        s->tipo = t;
+        return;
+    }
+
     if (s->tipo == t || t == TIPO_DESCONHECIDO)
         return;
 
@@ -341,7 +348,10 @@ expressao:
         free($1);
     }
   | IDENTIFIER LPAREN lista_argumentos RPAREN {
-        $$ = novaExpr(montarChamada($1, $3), TIPO_INTEIRO);
+        /* O tipo do resultado depende dos argumentos de cada chamada e so e
+           descoberto na geracao de codigo (geracao.c). Aqui fica desconhecido,
+           o que nao gera erro em cascata. */
+        $$ = novaExpr(montarChamada($1, $3), TIPO_DESCONHECIDO);
     }
   | expressao PLUS expressao   { $$ = novaExpr(criarNoOp('+', $1.no, $3.no), tipoAritmetico('+', $1.tipo, $3.tipo)); }
   | expressao MINUS expressao  { $$ = novaExpr(criarNoOp('-', $1.no, $3.no), tipoAritmetico('-', $1.tipo, $3.tipo)); }
