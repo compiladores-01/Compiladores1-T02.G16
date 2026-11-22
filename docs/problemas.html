@@ -80,6 +80,8 @@
                 <tbody>
                   <tr><th><code>print(a)</code> com <code>a = 2.5</code> imprimia lixo (<code>499982346</code>); <code>s + t</code> com strings nem compilava</th><td>O gerador não sabia o tipo de variáveis dentro de expressões e usava <code>printf("%d")</code></td><td><code>tipoDoNo()</code> passou a consultar as variáveis já registradas (locais, globais e parâmetros)</td><td>PR #41</td></tr>
                   <tr><th><code>b = a * 3</code> com <code>a = 2.5</code> dava <code>7</code> em vez de <code>7.5</code></th><td>Mesma causa: <code>b</code> era declarado <code>int</code></td><td>Mesma correção; coberto pelo teste <code>geracao/print_variaveis</code></td><td>PR #41</td></tr>
+                  <tr><th>Funções: <code>print(media(3, 4))</code> dava <code>4</code> em vez de <code>3.5</code>; <code>f("oi")</code> imprimia um número; uma global usada dentro de função fazia o C não compilar</th><td>O gerador tratava toda chamada como <code>int</code>, todo parâmetro como <code>int</code>, e declarava as globais dentro do <code>main</code>. Encontrado comparando a saída do compilador com a do Python em 25 programas</td><td>Análise de tipos das funções antes de gerar o C (parâmetros pelas chamadas, retorno pelos <code>return</code>) e globais usadas por funções declaradas fora do <code>main</code></td><td>PR #48</td></tr>
+                  <tr><th><code>m = media(3, 4)</code> seguido de <code>m = m + 0.5</code> dava erro semântico falso</th><td>A análise semântica considerava o resultado de toda chamada como <code>INTEIRO</code></td><td>O resultado de uma chamada fica com tipo desconhecido até o gerador descobrir o tipo real</td><td>PR #48</td></tr>
                 </tbody>
               </table>
             </div>
