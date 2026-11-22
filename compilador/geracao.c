@@ -501,6 +501,24 @@ static void marcarConcatenacao(const NoAST *no) {
     marcarConcatenacao(no->proximo);
 }
 
+/* Verifica se alguma funcao concatena strings, usando o contexto de cada
+ * funcao (parametros e variaveis locais). */
+static void marcarConcatenacaoEmFuncoes(void) {
+    for (int k = 0; k < quantidadeFuncoes; k++) {
+        InfoFuncao *f = &funcoes[k];
+        DeclaracaoVariavel locais[MAX_VARIAVEIS];
+        int quantidadeLocais = 0;
+        ctxFuncao = f;
+        ctxLocais = locais;
+        ctxQtdLocais = &quantidadeLocais;
+        coletarVariaveis(f->no->direita, locais, &quantidadeLocais, f->no->esquerda);
+        marcarConcatenacao(f->no->direita);
+    }
+    ctxFuncao = NULL;
+    ctxLocais = NULL;
+    ctxQtdLocais = NULL;
+}
+
 /* Descobre os tipos de globais, parametros e retornos antes de gerar o C.
  * Os tipos dependem uns dos outros (o retorno depende dos parametros, que
  * dependem dos argumentos, que podem ser globais...), por isso a analise
@@ -594,6 +612,7 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
      * variaveis string (ex.: s + t) */
     usouConcatenacao = 0;
     marcarConcatenacao(raiz);
+    marcarConcatenacaoEmFuncoes();
 
     fputs("/* Gerado automaticamente pelo compilador Python -> C */\n", saida);
     fputs("#include <stdio.h>\n", saida);
