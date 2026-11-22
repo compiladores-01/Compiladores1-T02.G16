@@ -1,91 +1,166 @@
-![](docs/assets/ptoc.jpg)
+![Compilador Python para C](docs/assets/img/python-c.jpg)
 
-## Introdução
+# Compilador Python → C
 
-Bem-vindo ao repositório do projeto de **Compiladores 1** da Universidade de Brasília.
+Projeto da disciplina **FGA0003 – Compiladores 1** (UnB/FCTE, 2026/2), turma T02, equipe G16.
 
-O projeto aborda os fundamentos e os mecanismos envolvidos na construção de compiladores: análise léxica, análise sintática, representação intermediária, análise semântica e geração de código. Como aplicação prática, a equipe desenvolve um compilador de um subconjunto de `Python` para `C`, utilizando **Flex** e **Bison**.
+O compilador lê um programa escrito em um **subconjunto de Python** e gera um programa **C** equivalente, que pode ser compilado com o `gcc`. Foi construído com **Flex** (análise léxica), **Bison** (análise sintática) e **C**.
 
+**Equipe:** Fernanda Vaz · Manoel Castro · Cauã Clemente
+**Documentação do projeto** (planejamento, sprints, atas, decisões, problemas): pasta [`docs/`](docs/)
 
+---
 
-## Como Executar
+## Exemplo
 
-### 1. Clonar o repositório
+Entrada (`entrada.py`):
 
-```bash
-git clone https://github.com/Fernandavazgit1/-FGA0003Compiladores1-T02.G16.git
-cd -FGA0003Compiladores1-T02.G16
+```python
+x = 0
+while x < 3:
+    print(x)
+    x = x + 1
+
+def soma(a, b):
+    return a + b
+
+n = soma(55, 3)
+if n > 4:
+    print(n)
+else:
+    print(0)
 ```
 
-### 2. Instalar dependências
+Saída gerada (`saida.c`):
 
-É necessário ter **Flex**, **Bison** e **GCC** instalados.
+```c
+int soma(int a, int b) {
+    return (a + b);
+}
 
-Em distribuições Linux baseadas em Debian/Ubuntu:
+int main(void) {
+    int x = 0;
+    int n = 0;
+    x = 0;
+    while ((x < 3)) {
+        printf("%d\n", x);
+        x = (x + 1);
+    }
+    n = soma(55, 3);
+    if ((n > 4)) {
+        printf("%d\n", n);
+    } else {
+        printf("%d\n", 0);
+    }
+    return 0;
+}
+```
+
+---
+
+## Como executar
+
+### 1. Pré-requisitos
+
+**Flex**, **Bison**, **GCC** e **Make**. No Ubuntu/Debian (ou WSL2 no Windows):
 
 ```bash
 sudo apt-get update
 sudo apt-get install flex bison build-essential
 ```
 
-No Windows, recomenda-se utilizar **WSL2** ou **MSYS2 MinGW64**.
-
-### 3. Compilar o compilador
-
-No terminal com Flex, Bison, GCC e Make instalados, execute:
+### 2. Clonar e compilar
 
 ```bash
-cd compilador
+git clone https://github.com/compiladores-01/Compiladores1-T02.G16.git
+cd Compiladores1-T02.G16/compilador
 make
 ```
 
-O executável gerado é `compilador-bin`.
+Isso gera o executável `compilador-bin`.
 
-### 4. Testar com um programa de entrada
-
-```bash
-./compilador-bin entrada.py saida.c
-```
-
-O compilador analisa `entrada.py` e gera o código C em `saida.c`. Para compilar e executar esse código:
+### 3. Traduzir um programa Python para C
 
 ```bash
-gcc saida.c -o saida_prog
-./saida_prog
+./compilador-bin entrada.py saida.c   # lê entrada.py e gera saida.c
+gcc saida.c -o programa
+./programa
 ```
 
-Também é possível testar outra entrada, passando os caminhos como argumentos:
+Os dois argumentos são opcionais. Sem argumentos, o compilador lê da entrada padrão e gera `saida.c`:
 
 ```bash
-./compilador-bin caminho/para/programa.py caminho/para/saida.c
+echo 'print(1 + 2 * 3)' | ./compilador-bin
 ```
 
-No Windows, use o terminal do WSL2 ou o terminal MinGW64 do MSYS2 para executar esses comandos.
+### 4. Rodar os testes
 
-## Estado Atual
+```bash
+cd compilador
+make test
+```
 
-O compilador implementa um subconjunto de Python, incluindo variáveis, expressões, impressão, condicionais, laços e funções, com análise semântica e geração de código C.
+A suíte roda os testes automáticos de cada etapa (lexer, parser, AST, tabela de símbolos e geração de código) e mostra `[OK]` ou `[FALHA]` para cada um. Detalhes em [`tests/README.md`](tests/README.md).
 
+---
 
+## Subconjunto de Python suportado
 
-## Pipeline do Compilador
+| Construção | Exemplo | Tradução em C |
+|---|---|---|
+| Inteiros, reais, strings, booleanos | `10`, `-5`, `2.5`, `"oi"`, `'oi'`, `True` | `int`, `double`, `const char *`, `int` (1/0, impresso como `True`/`False`) |
+| Atribuição e expressões | `x = 1 + 2 * 3`, `-x` | `x = (1 + (2 * 3));` |
+| Resto da divisão | `-7 % 3` | função auxiliar `py_resto()`, com o sinal igual ao do Python (`2`) |
+| Comparações | `==` `!=` `<` `>` `<=` `>=` | mesmos operadores |
+| Operadores lógicos | `and`, `or`, `not` | `&&`, `\|\|`, `!` (mesma precedência do Python) |
+| Concatenação de strings | `s + " mundo"` | função auxiliar `concatenar()` |
+| `print` | `print(x)` | `printf` com o formato do tipo; float impresso como o Python (`2.0`, `0.30000000000000004`) por `py_print_float()` |
+| `if` / `elif` / `else` | blocos por **indentação** | `if { } else { if ... }` |
+| `while` | blocos por **indentação** | `while { }` |
+| Funções | `def f(a, b):` / `return` | função C antes do `main`, com tipos de parâmetros e retorno deduzidos |
+| Comentários | `# ...` | ignorados |
+
+Fora do escopo: classes, listas, `for`, `import`, exceções, `print` com vários valores.
+
+---
+
+## Pipeline
 
 ```text
-programa.py -> Flex -> tokens -> Bison -> AST -> análise semântica -> código C
+programa.py
+   │
+   ▼  Flex  (compilador/lexer/lexer.l)
+tokens  ── inclui INDENT / DEDENT para os blocos
+   │
+   ▼  Bison (compilador/parser/parser.y)
+AST     (compilador/ast.c)
+   │
+   ▼  análise semântica + tabela de símbolos (compilador/tabela.c)
+AST validada  ── tipos inferidos, variáveis verificadas
+   │
+   ▼  geração de código (compilador/geracao.c)
+saida.c  ──►  gcc  ──►  executável
 ```
 
-## Melhorias Planejadas
+Explicação de cada etapa em [`compilador/README.md`](compilador/README.md).
 
-- ampliar o conjunto de tokens reconhecidos;
-- implementar variáveis e atribuições;
-- adicionar estruturas `if`, `else` e `while`;
-- construir e percorrer a AST;
-- implementar tabela de símbolos e checagens semânticas;
-- gerar arquivos `.c` a partir da AST ou de uma representação intermediária;
-- adicionar testes automatizados;
-- documentar decisões técnicas, problemas e soluções.
+---
 
-## Organização da Equipe
+## Estrutura do repositório
 
-As atividades são organizadas em sprints, com acompanhamento no GitHub e na documentação do projeto. As páginas de planejamento, atas, atividades semanais e decisões técnicas estão disponíveis no site MkDocs.
-![Logo do Projeto](C:\Users\euoid\Documents\compiladores\-FGA0003Compiladores1-T02.G16\docs\assets\ptoc.jpg)
+```text
+.
+├── compilador/          código-fonte do compilador
+│   ├── lexer/lexer.l      analisador léxico (Flex)
+│   ├── parser/parser.y    analisador sintático + ações semânticas (Bison)
+│   ├── ast.c / ast.h      árvore sintática abstrata
+│   ├── tabela.c / .h      tabela de símbolos
+│   ├── geracao.c / .h     gerador de código C
+│   ├── tipos.h            tipos de dados do compilador
+│   ├── test_lexer.c       programa auxiliar que roda só o lexer (testes)
+│   ├── entrada.py         programa de exemplo
+│   └── Makefile
+├── tests/               suíte de testes automáticos (make test)
+├── docs/                site de documentação do projeto
+└── README.md
+```
