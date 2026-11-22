@@ -27,6 +27,7 @@ typedef struct {
 } InfoFuncao;
 
 static int usouConcatenacao = 0;
+static int usouModulo = 0;
 
 static InfoFuncao funcoes[MAX_FUNCOES];
 static int quantidadeFuncoes = 0;
@@ -325,6 +326,15 @@ static void emitirExpressao(FILE *saida, const NoAST *no) {
                     break;
                 }
             }
+            if (no->operador == '%') {
+                /* resto com o sinal do divisor, como em Python (-7 % 3 == 2) */
+                fputs("py_resto(", saida);
+                emitirExpressao(saida, no->esquerda);
+                fputs(", ", saida);
+                emitirExpressao(saida, no->direita);
+                fputs(")", saida);
+                break;
+            }
             if (no->operador == '/') {
                 fputs("((double)(", saida);
                 emitirExpressao(saida, no->esquerda);
@@ -340,6 +350,12 @@ static void emitirExpressao(FILE *saida, const NoAST *no) {
             fputs(")", saida);
             break;
         case AST_COMP:
+            if (!no->esquerda) {            /* not x */
+                fputs("(!", saida);
+                emitirExpressao(saida, no->direita);
+                fputs(")", saida);
+                break;
+            }
             fputs("(", saida);
             emitirExpressao(saida, no->esquerda);
             fprintf(saida, " %s ", no->comparador);
@@ -491,6 +507,8 @@ static void emitirFuncao(FILE *saida, InfoFuncao *f) {
 
 static void marcarConcatenacao(const NoAST *no) {
     if (!no) return;
+    if (no->tipo == AST_OP && no->operador == '%')
+        usouModulo = 1;
     if (no->tipo == AST_OP && no->operador == '+') {
         if (tipoDoNo(no->esquerda) == TIPO_STRING || tipoDoNo(no->direita) == TIPO_STRING)
             usouConcatenacao = 1;
@@ -611,6 +629,7 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
     /* depois de conhecer os tipos, para reconhecer concatenacao entre
      * variaveis string (ex.: s + t) */
     usouConcatenacao = 0;
+    usouModulo = 0;
     marcarConcatenacao(raiz);
     marcarConcatenacaoEmFuncoes();
 
@@ -626,6 +645,14 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
         fputs("    if (!r) return \"\";\n", saida);
         fputs("    strcpy(r, a);\n", saida);
         fputs("    strcat(r, b);\n", saida);
+        fputs("    return r;\n", saida);
+        fputs("}\n\n", saida);
+    }
+
+    if (usouModulo) {
+        fputs("static int py_resto(int a, int b) {\n", saida);
+        fputs("    int r = a % b;\n", saida);
+        fputs("    if (r != 0 && (r < 0) != (b < 0)) r += b;\n", saida);
         fputs("    return r;\n", saida);
         fputs("}\n\n", saida);
     }

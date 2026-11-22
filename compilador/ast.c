@@ -165,9 +165,20 @@ void imprimirAST(const NoAST *raiz) {
             printf(")");
             break;
         case AST_COMP:
+            if (!raiz->esquerda) {          /* not x */
+                printf("(not ");
+                imprimirAST(raiz->direita);
+                printf(")");
+                break;
+            }
             printf("(");
             imprimirAST(raiz->esquerda);
-            printf(" %s ", raiz->comparador);
+            if (strcmp(raiz->comparador, "&&") == 0)
+                printf(" and ");
+            else if (strcmp(raiz->comparador, "||") == 0)
+                printf(" or ");
+            else
+                printf(" %s ", raiz->comparador);
             imprimirAST(raiz->direita);
             printf(")");
             break;

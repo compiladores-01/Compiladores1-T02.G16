@@ -28,6 +28,11 @@ static const char *nomeToken(int t) {
         case PRINT:      return "PRINT";
         case IF:         return "IF";
         case ELSE:       return "ELSE";
+        case ELIF:       return "ELIF";
+        case AND:        return "AND";
+        case OR:         return "OR";
+        case NOT:        return "NOT";
+        case MOD:        return "MOD";
         case WHILE:      return "WHILE";
         case DEF:        return "DEF";
         case RETURN:     return "RETURN";

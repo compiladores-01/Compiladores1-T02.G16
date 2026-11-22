@@ -117,6 +117,10 @@ static void aplicar_indentacao(int nivel) {
 "while"     { return WHILE; }
 "def"       { return DEF; }
 "return"    { return RETURN; }
+"elif"      { return ELIF; }
+"and"       { return AND; }
+"or"        { return OR; }
+"not"       { return NOT; }
 "True"      { yylval.inteiro = 1; return BOOLEAN; }
 "False"     { yylval.inteiro = 0; return BOOLEAN; }
 
@@ -146,6 +150,7 @@ static void aplicar_indentacao(int nivel) {
 "-"             { return MINUS; }
 "*"             { return TIMES; }
 "/"             { return DIVIDE; }
+"%"             { return MOD; }
 [0-9]+\.[0-9]+  { yylval.real = atof(yytext); return FLOAT; }
 [0-9]+          { yylval.inteiro = atoi(yytext); return NUMBER; }
 \"[^\"\n]*\"    { yylval.texto = copiarLexema(yytext); return STRING; }

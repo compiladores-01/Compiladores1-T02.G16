@@ -4,3 +4,7 @@ else
 while
 def
 return
+elif
+and
+or
+not
