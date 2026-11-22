@@ -32,8 +32,9 @@
       <aside class="contents" aria-label="Sumário">
         <p class="contents__heading">NESTA PÁGINA</p>
         <nav class="contents__nav">
-          <a href="#p1" class="is-current"><span>00</span> Fase 1</a>
-          <a href="#p2"><span>01</span> Fase 2</a>
+          <a href="#frontend" class="is-current"><span>00</span> Léxico e sintaxe</a>
+          <a href="#backend"><span>01</span> Geração de C</a>
+          <a href="#processo"><span>02</span> Processo e testes</a>
         </nav>
         <div class="contents__note">
           <span>PROJETO</span>
@@ -47,40 +48,64 @@
           <header class="report__header">
             <p class="kicker">ACOMPANHAMENTO <span>/</span> IMPEDIMENTOS</p>
             <h1>Problemas e <em>soluções</em></h1>
+            <p class="report__lead">Problemas reais encontrados durante o desenvolvimento, com a causa, a solução adotada e onde ela está no repositório.</p>
             <div class="metadata">
             </div>
           </header>
 
-          <section class="report-section" id="p1">
+          <section class="report-section" id="frontend">
             <p class="section-index">00 <span>/</span> FRONT-END</p>
-            <h2>Problemas e soluções 1</h2>
-            
+            <h2>Análise léxica e sintática</h2>
             <div class="table-scroll">
               <table class="document-table">
-                <thead><tr><th>Problema</th><th>Solução</th></tr></thead>
+                <thead><tr><th>Problema</th><th>Causa</th><th>Solução</th><th>Onde</th></tr></thead>
                 <tbody>
-                  <tr><th>Ausência de padronização na arquitetura do repositório, que dificultava localizar arquivos e controlar versões.</th><td>Foi implementada uma nova estrutura de diretórios dedicados.</td></tr>
+                  <tr><th>Arquivos criados no Windows quebravam no Linux</th><td>Quebra de linha CRLF (<code>\r\n</code>) do Windows</td><td><code>git config core.autocrlf false</code>; o lexer também ignora <code>\r</code></td><td><code>lexer.l</code></td></tr>
+                  <tr><th>Bison falhava na linha 1 do <code>parser.y</code>: <code>invalid characters</code>, sem nenhum caractere visível</th><td>Caractere invisível BOM (<em>Byte Order Mark</em>) inserido por um editor do Windows</td><td>Remover com <code>sed -i '1s/^\xEF\xBB\xBF//' parser.y</code>, direto na branch do PR, antes do merge</td><td>PR #34</td></tr>
+                  <tr><th><code>if x &gt; 5: { print(1) }</code> dava erro sintático</th><td>O lexer não reconhecia <code>{ }</code> e o parser não consumia o <code>NEWLINE</code> do bloco</td><td>Documentado na Issue #35; resolvido trocando os blocos por indentação (<code>INDENT</code>/<code>DEDENT</code>)</td><td>Issue #35, PR #39</td></tr>
+                  <tr><th><code>x = -5</code>, <code>elif</code>, <code>and</code>/<code>or</code>/<code>not</code> e <code>%</code> davam erro sintático</th><td>Essas construções não existiam no lexer nem na gramática</td><td>Tokens e regras novas, com a precedência do Python; <code>%</code> com o sinal do Python (<code>-7 % 3 == 2</code>)</td><td>PR #49</td></tr>
+                  <tr><th><code>print("hello</code> virava “caractere inválido” + identificador</th><td>Nenhuma regra tratava a aspa sem fechamento; a regra de string atravessava linhas</td><td>Regra de erro <code>string nao terminada</code> e strings limitadas a uma linha</td><td>PR #43</td></tr>
+                  <tr><th><code>y = 'oi'</code> gerava C inválido (<code>character constant too long</code>)</th><td>Em C, aspas simples são para um caractere só</td><td>O lexer converte aspas simples para duplas</td><td>PR #43</td></tr>
+                  <tr><th>Construção da árvore sintática (AST)</th><td>Muitos tipos de nó e integração com todas as regras do parser</td><td>Dividir em etapas, validar cada estrutura com exemplos e revisar a integração com o parser</td><td>PR #39</td></tr>
                 </tbody>
               </table>
             </div>
-    
           </section>
 
-          <section class="report-section report-section--last" id="p2">
-            <p class="section-index">01 <span>/</span> BACKEND</p>
-            <h2>Problemas e soluções 2</h2>
-            
+          <section class="report-section" id="backend">
+            <p class="section-index">01 <span>/</span> BACK-END</p>
+            <h2>Semântica e geração de código</h2>
             <div class="table-scroll">
               <table class="document-table">
-                <thead><tr><th>Problema</th><th>Solução</th></tr></thead>
+                <thead><tr><th>Problema</th><th>Causa</th><th>Solução</th><th>Onde</th></tr></thead>
                 <tbody>
-                  <tr><th>Construção da árvore sintática (AST).</th><td>Dividir a implementação em etapas, validar cada estrutura com exemplos e revisar a integração com o parser.</td></tr>
-                  <tr><th>Uso eficiente das ferramentas de inteligência artificial.</th><td>Usar as ferramentas como apoio, revisar as sugestões e validar o código antes de integrá-lo ao projeto.</td></tr>
-                  <tr><th>Gestão do tempo.</th><td>Priorizar as tarefas, dividi-las entre os integrantes e acompanhar o progresso ao longo das sprints.</td></tr>
+                  <tr><th><code>print(a)</code> com <code>a = 2.5</code> imprimia lixo (<code>499982346</code>); <code>s + t</code> com strings nem compilava</th><td>O gerador não sabia o tipo de variáveis dentro de expressões e usava <code>printf("%d")</code></td><td><code>tipoDoNo()</code> passou a consultar as variáveis já registradas (locais, globais e parâmetros)</td><td>PR #41</td></tr>
+                  <tr><th><code>b = a * 3</code> com <code>a = 2.5</code> dava <code>7</code> em vez de <code>7.5</code></th><td>Mesma causa: <code>b</code> era declarado <code>int</code></td><td>Mesma correção; coberto pelo teste <code>geracao/print_variaveis</code></td><td>PR #41</td></tr>
+                  <tr><th>Funções: <code>print(media(3, 4))</code> dava <code>4</code> em vez de <code>3.5</code>; <code>f("oi")</code> imprimia um número; uma global usada dentro de função fazia o C não compilar</th><td>O gerador tratava toda chamada como <code>int</code>, todo parâmetro como <code>int</code>, e declarava as globais dentro do <code>main</code>. Encontrado comparando a saída do compilador com a do Python em 25 programas</td><td>Análise de tipos das funções antes de gerar o C (parâmetros pelas chamadas, retorno pelos <code>return</code>) e globais usadas por funções declaradas fora do <code>main</code></td><td>PR #48</td></tr>
+                  <tr><th>O literal <code>3.14159265</code> virava <code>3.14159</code> no C gerado; <code>print(10 / 5)</code> mostrava <code>2</code> em vez de <code>2.0</code></th><td>O gerador escrevia e imprimia floats com <code>%g</code>, que usa só 6 dígitos significativos e esconde o <code>.0</code></td><td>Literais com a menor quantidade de dígitos que representa o valor exato; impressão por <code>py_print_float()</code>, conferida contra o <code>repr</code> do Python</td><td>PR #50</td></tr>
+                  <tr><th><code>m = media(3, 4)</code> seguido de <code>m = m + 0.5</code> dava erro semântico falso</th><td>A análise semântica considerava o resultado de toda chamada como <code>INTEIRO</code></td><td>O resultado de uma chamada fica com tipo desconhecido até o gerador descobrir o tipo real</td><td>PR #48</td></tr>
                 </tbody>
               </table>
             </div>
-    
+          </section>
+
+          <section class="report-section report-section--last" id="processo">
+            <p class="section-index">02 <span>/</span> PROCESSO</p>
+            <h2>Processo, testes e organização</h2>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Problema</th><th>Causa</th><th>Solução</th><th>Onde</th></tr></thead>
+                <tbody>
+                  <tr><th>PR de strings ficou impossível de mesclar</th><td>A branch ficou semanas parada enquanto a <code>main</code> mudava (refatoração para <code>compilador/</code>)</td><td>PRs menores e atualizar a branch com a <code>main</code> antes de abrir o PR</td><td>PR #25, PR #43</td></tr>
+                  <tr><th>Depois do PR #39, quase todos os testes “falhavam”</th><td>O formato da saída mudou; a comparação era visual e os esperados estavam antigos</td><td>Esperados atualizados (conferidos um a um) e suíte automática com <code>make test</code></td><td>PR #42</td></tr>
+                  <tr><th>Número dos tokens no <code>test_lexer</code> mudava a cada token novo no parser</th><td>Bison numera os tokens pela ordem de declaração</td><td><code>test_lexer</code> imprime o nome do token (<code>IDENTIFIER(x)</code>)</td><td>PR #42</td></tr>
+                  <tr><th>Arquivos gerados (<code>lex.yy.c</code>, <code>parser.tab.c</code>, binários) apareciam como modificados em todo commit</th><td>Estão versionados no repositório e o <code>make</code> gera de novo</td><td>Descartar com <code>git checkout -- &lt;arquivo&gt;</code> antes do commit; adicionar só os fontes</td><td>—</td></tr>
+                  <tr><th>Ausência de padronização na arquitetura do repositório, que dificultava localizar arquivos e controlar versões</th><td>Arquivos do lexer e do parser espalhados na raiz</td><td>Nova estrutura de diretórios dedicada (<code>compilador/</code>, <code>tests/</code>, <code>docs/</code>)</td><td>P1</td></tr>
+                  <tr><th>Uso eficiente das ferramentas de inteligência artificial</th><td>—</td><td>Usar como apoio, revisar as sugestões e validar com testes antes de integrar</td><td>P2</td></tr>
+                  <tr><th>Gestão do tempo</th><td>—</td><td>Priorizar, dividir tarefas e acompanhar nas reuniões de quarta</td><td>P2</td></tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <footer class="report-footer">
