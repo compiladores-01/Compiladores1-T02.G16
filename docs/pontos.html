@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08110c">
+    <meta name="description" content="Checklists de P1 e P2.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Pontos de controle | Compiladores 1 — FGA0003</title>
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="brand" href="index.html"><img class="brand__logo" src="assets/img/unb.jpg" alt="UnB">FGA0003 <span>/</span> COMPILADORES 1</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+        <div class="nav-menu" id="nav-menu">
+          <a href="index.html">Projeto</a>
+          <a href="planejamento.html">Planejamento</a>
+          <a href="sprints.html">Sprints</a>
+          <a href="atas.html">Atas</a>
+          <a href="atividades.html">Semanas</a>
+          <a href="decisoes.html">Decisões</a>
+          <a href="problemas.html">Problemas</a>
+          <a href="pontos.html" class="is-current">Pontos</a>
+          <a href="tokens.html">Tokens</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="document-shell" id="inicio">
+      <aside class="contents" aria-label="Sumário">
+        <p class="contents__heading">NESTA PÁGINA</p>
+        <nav class="contents__nav">
+          <a href="#p1" class="is-current"><span>00</span> Ponto 1</a>
+          <a href="#p2"><span>01</span> Ponto 2</a>
+        </nav>
+        <div class="contents__note">
+          <span>PROJETO</span>
+          <code>Python → C</code>
+          <a class="text-link" href="https://github.com/compiladores-01/Compiladores1-T02.G16">Repositório GitHub</a>
+        </div>
+      </aside>
+
+      <main class="report">
+        <article>
+          <header class="report__header">
+            <p class="kicker">AVALIAÇÃO <span>/</span> P1 E P2</p>
+            <h1>Pontos de <em>controle</em></h1>
+            <p class="report__lead">Status das entregas intermediárias, preenchido com evidências do repositório do compilador.</p>
+            <div class="metadata">
+              <p><span>P1</span>23–30/09/2026</p>
+              <p><span>P2</span>04–11/11/2026</p>
+            </div>
+          </header>
+
+          <section class="report-section" id="p1">
+            <p class="section-index">00 <span>/</span> P1</p>
+            <h2>Ponto de controle 1</h2>
+            
+            <p>Primeira entrega intermediária: definir o projeto, a subset, o planejamento e mostrar o front-end.</p>
+            <ul class="checklist">
+              <li class="done">Documentação atualizada (sprints e atas iniciais)</li>
+              <li class="done">Código compilando via Makefile (lexer + parser + AST)</li>
+              <li class="open">Demonstração: ensaiar 5–8 min com todos falando a própria frente</li>
+            </ul>
+            <p>Evidência: repositório com <code>lexer.l</code>, <code>parser.y</code> e dump da AST em programas válidos.</p>
+    
+          </section>
+
+          <section class="report-section report-section--last" id="p2">
+            <p class="section-index">01 <span>/</span> P2</p>
+            <h2>Ponto de controle 2</h2>
+            
+            <p>Segunda entrega: pipeline completo até a geração de C, testes abrangentes e evolução desde P1.</p>
+            <ul class="checklist">
+              <li class="done">Documentação deste site cobrindo todas as abas exigidas</li>
+              <li class="done">Código compilando e gerando C (<code>geracao.c</code>, <code>entrada.py</code>)</li>
+              <li class="done">AST, tabela de símbolos e análise semântica implementadas</li>
+              <li class="done">Testes para lexer, parser, AST, tabela de símbolos e tipos</li>
+            </ul>
+            <p>Melhorias desde P1: AST, tabela de símbolos, análise semântica, suíte de testes e geração de código C.</p>
+    
+          </section>
+
+          <footer class="report-footer">
+            <p>FGA0003 <span>—</span> COMPILADORES 1 · T02 · G16</p>
+            <a class="text-link" href="index.html">Página do projeto ↑</a>
+            <p class="copyright">Universidade de Brasília · FCTE · 2026/2</p>
+          </footer>
+        </article>
+      </main>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

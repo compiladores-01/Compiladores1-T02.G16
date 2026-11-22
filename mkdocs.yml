@@ -1,115 +1,12 @@
-﻿site_name: compiladores 01
-site_description: Documentação do projeto de Compiladores 1 — Universidade de Brasília
+site_name: Compiladores 1 — FGA0003
+site_description: Documentação do compilador Python para C da disciplina FGA0003 Compiladores 1.
 site_author: Compiladores 01 · UnB
 site_url: https://fernandavazgit1.github.io/-FGA0003Compiladores1-T02.G16/
 repo_name: Fernandavazgit1/-FGA0003Compiladores1-T02.G16
 repo_url: https://github.com/Fernandavazgit1/-FGA0003Compiladores1-T02.G16
-edit_uri: edit/main/docs/
 copyright: Universidade de Brasília (UnB) · Compiladores 1
 
-theme:
-  name: material
-  language: pt-BR
-  logo: assets/as_vert_cor.jpg
-  favicon: assets/as_vert_cor.jpg
-  font:
-    text: IBM Plex Serif
-    code: IBM Plex Mono
-  palette:
-    - scheme: default
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-night
-        name: Trocar para modo escuro
-    - scheme: slate
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-sunny
-        name: Trocar para modo claro
-  features:
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - content.code.copy
-    - search.suggest
-    - search.highlight
-    - navigation.top
-
-nav:
-  - Home:
-      - Sobre: index.md
-  - Planejamento:
-      - Cronograma: planejamento/cronograma.md
-      - Metodologia: planejamento/metodologia.md
-      - Ferramentas: planejamento/ferramentas.md
-      - Planejamento das Sprints: planejamento/planejamento_das_sprints.md
-  # - Projeto Final:
-  #     - Guia Detalhado: Projeto_Final/Guia_detalhado.md
-  #     - Especificação do Projeto: Projeto_Final/Especificacao_do_projeto.md
-  - Decisões Técnicas: decisoes/decisao.md
-  - Problemas e Soluções:
-      - Problemas e Soluções 1: problemas_e_solucoes/problemas_e_solucoes1.md
-      - Problemas e Soluções 2: problemas_e_solucoes/problemas_e_solucoes2.md
-  - Atas de Reunião:
-      - Ata 1: atas/ata1.md
-      - Ata 2: atas/ata2.md
-      - Ata 3: atas/ata3.md
-      - Ata 4: atas/ata4.md
-      - Ata 5: atas/ata5.md
-  - Sprints:
-      - Visão Geral: sprints/sprint.md
-      - Sprint 0: sprints/sprint-00.md
-      - Sprint 1: sprints/sprint-01.md
-      - Sprint 2: sprints/sprint-02.md
-      - Sprint 3: sprints/sprint-03.md
-    #  - Sprint 4: sprints/sprint-04.md
-      #- Sprint 5: sprints/sprint-05.md
-      #- Sprint 6: sprints/sprint-06.md
-     # - Sprint 7: sprints/sprint-07.md
-     # - Sprint 8: sprints/sprint-08.md
-      #- Sprint 9: sprints/sprint-09.md
-  - Atividades Semanais:
-      - Semana 1: atividades_semanais/Semana1.md
-      - Semana 2: atividades_semanais/Semana2.md
-      - Semana 3: atividades_semanais/Semana3.md
-      - Semana 4: atividades_semanais/Semana4.md
-      - Semana 5: atividades_semanais/Semana5.md
-      - Semana 6: atividades_semanais/Semana6.md
-      - Semana 7: atividades_semanais/Semana7.md
-      - Semana 8: atividades_semanais/Semana8.md
-      - Semana 9: atividades_semanais/Semana9.md
-      - Semana 10: atividades_semanais/Semana10.md
-  - Ponto de Controle:
-      - Ponto de Controle 1: ponto_de_controle/ponto_de_controle1.md
-      - Ponto de Controle 2: ponto_de_controle/ponto_de_controle2.md
-
-extra:
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/Fernandavazgit1/-FGA0003Compiladores1-T02.G16
-    - icon: fontawesome/solid/globe
-      link: https://www.unb.br/
-
-extra_css:
-  - stylesheets/extra.css
-
-markdown_extensions:
-  - admonition
-  - attr_list
-  - md_in_html
-  - tables
-  - toc:
-      permalink: true
-  - pymdownx.details
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.tasklist:
-      custom_checkbox: true
-
-plugins:
-  - search:
-      lang: pt
+docs_dir: docs
+site_dir: site
+exclude_docs: |
+  _generate_docs.py
