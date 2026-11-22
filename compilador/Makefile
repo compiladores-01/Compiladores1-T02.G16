@@ -32,7 +32,7 @@ ast.o: ast.c ast.h tipos.h
 tabela.o: tabela.c tabela.h tipos.h
 	$(CC) $(CFLAGS) -c tabela.c -o $@
 
-geracao.o: geracao.c geracao.h ast.h tipos.h
+geracao.o: geracao.c geracao.h ast.h tipos.h tabela.h
 	$(CC) $(CFLAGS) -c geracao.c -o $@
 
 # Programa auxiliar que roda so o lexer (usado pelos testes)
