@@ -28,6 +28,7 @@ typedef struct {
 
 static int usouConcatenacao = 0;
 static int usouModulo = 0;
+static int usouFloat = 0;
 
 static InfoFuncao funcoes[MAX_FUNCOES];
 static int quantidadeFuncoes = 0;
@@ -272,6 +273,20 @@ static const char *nomeTipoC(TipoDado t) {
     }
 }
 
+/* Escreve um literal float no C com a menor quantidade de digitos que
+ * ainda representa exatamente o mesmo valor (%g sozinho guarda so 6
+ * digitos: 3.14159265 viraria 3.14159). Sempre com ponto: 2.0, nao 2. */
+static void escreverFloat(FILE *saida, double v) {
+    char buf[64];
+    for (int p = 1; p <= 17; p++) {
+        snprintf(buf, sizeof(buf), "%.*g", p, v);
+        if (strtod(buf, NULL) == v) break;
+    }
+    if (!strpbrk(buf, ".eni"))
+        strcat(buf, ".0");
+    fputs(buf, saida);
+}
+
 static void emitirIndentacao(FILE *saida, int nivel) {
     for (int i = 0; i < nivel; i++)
         fputs("    ", saida);
@@ -301,7 +316,7 @@ static void emitirExpressao(FILE *saida, const NoAST *no) {
             fprintf(saida, "%d", no->valor);
             break;
         case AST_FLOAT:
-            fprintf(saida, "%g", no->valorFloat);
+            escreverFloat(saida, no->valorFloat);
             break;
         case AST_BOOL:
             fprintf(saida, "%d", no->valor);
@@ -378,7 +393,7 @@ static void emitirImpressao(FILE *saida, const NoAST *expressao, int nivel) {
     emitirIndentacao(saida, nivel);
     switch (t) {
         case TIPO_FLOAT:
-            fputs("printf(\"%g\\n\", ", saida);
+            fputs("py_print_float(", saida);
             emitirExpressao(saida, expressao);
             fputs(");\n", saida);
             break;
@@ -509,6 +524,8 @@ static void marcarConcatenacao(const NoAST *no) {
     if (!no) return;
     if (no->tipo == AST_OP && no->operador == '%')
         usouModulo = 1;
+    if (no->tipo == AST_PRINT && tipoDoNo(no->esquerda) == TIPO_FLOAT)
+        usouFloat = 1;
     if (no->tipo == AST_OP && no->operador == '+') {
         if (tipoDoNo(no->esquerda) == TIPO_STRING || tipoDoNo(no->direita) == TIPO_STRING)
             usouConcatenacao = 1;
@@ -630,6 +647,7 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
      * variaveis string (ex.: s + t) */
     usouConcatenacao = 0;
     usouModulo = 0;
+    usouFloat = 0;
     marcarConcatenacao(raiz);
     marcarConcatenacaoEmFuncoes();
 
@@ -654,6 +672,30 @@ int gerarCodigoC(const NoAST *raiz, const char *arquivo) {
         fputs("    int r = a % b;\n", saida);
         fputs("    if (r != 0 && (r < 0) != (b < 0)) r += b;\n", saida);
         fputs("    return r;\n", saida);
+        fputs("}\n\n", saida);
+    }
+
+    if (usouFloat) {
+        /* imprime um float como o Python: menor numero de digitos que
+         * representa o valor, sempre com ".0" (2.0, 0.30000000000000004),
+         * e notacao cientifica fora de 1e-4 <= |x| < 1e16 (1e+16, 1e-05) */
+        fputs("static void py_print_float(double x) {\n", saida);
+        fputs("    char buf[64];\n", saida);
+        fputs("    int p, e, casas;\n", saida);
+        fputs("    if (x != x) { printf(\"nan\\n\"); return; }\n", saida);
+        fputs("    if (x - x != x - x) { printf(x > 0 ? \"inf\\n\" : \"-inf\\n\"); return; }\n", saida);
+        fputs("    for (p = 1; p < 17; p++) {\n", saida);
+        fputs("        snprintf(buf, sizeof(buf), \"%.*e\", p - 1, x);\n", saida);
+        fputs("        if (strtod(buf, NULL) == x) break;\n", saida);
+        fputs("    }\n", saida);
+        fputs("    snprintf(buf, sizeof(buf), \"%.*e\", p - 1, x);\n", saida);
+        fputs("    e = atoi(strchr(buf, 'e') + 1);\n", saida);
+        fputs("    if (e < -4 || e >= 16) { printf(\"%s\\n\", buf); return; }\n", saida);
+        fputs("    casas = p - 1 - e;\n", saida);
+        fputs("    if (casas < 0) casas = 0;\n", saida);
+        fputs("    snprintf(buf, sizeof(buf), \"%.*f\", casas, x);\n", saida);
+        fputs("    if (!strchr(buf, '.')) strcat(buf, \".0\");\n", saida);
+        fputs("    printf(\"%s\\n\", buf);\n", saida);
         fputs("}\n\n", saida);
     }
 
