@@ -33,7 +33,11 @@
         <p class="contents__heading">NESTA PÁGINA</p>
         <nav class="contents__nav">
           <a href="#estruturantes" class="is-current"><span>00</span> Estruturantes</a>
-          <a href="#registro"><span>01</span> Como registrar</a>
+          <a href="#frontend"><span>01</span> Léxico e sintaxe</a>
+          <a href="#semantica"><span>02</span> Semântica e tipos</a>
+          <a href="#geracao"><span>03</span> Geração de C</a>
+          <a href="#qualidade"><span>04</span> Testes e processo</a>
+          <a href="#registro"><span>05</span> Como registrar</a>
         </nav>
         <div class="contents__note">
           <span>PROJETO</span>
@@ -57,7 +61,6 @@
           <section class="report-section" id="estruturantes">
             <p class="section-index">00 <span>/</span> BASE</p>
             <h2>Decisões estruturantes</h2>
-            
             <div class="table-scroll">
               <table class="document-table">
                 <thead><tr><th>Decisão</th><th>Alternativas</th><th>Justificativa</th></tr></thead>
@@ -71,20 +74,83 @@
                 </tbody>
               </table>
             </div>
-    
+          </section>
+
+          <section class="report-section" id="frontend">
+            <p class="section-index">01 <span>/</span> FRONT-END</p>
+            <h2>Análise léxica e sintática</h2>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Decisão</th><th>Alternativa considerada</th><th>Por que escolhemos</th><th>Consequência</th></tr></thead>
+                <tbody>
+                  <tr><th>Blocos por <strong>indentação</strong>: o lexer gera <code>INDENT</code> / <code>DEDENT</code> com uma pilha de níveis de recuo</th><td>Exigir <code>{ }</code> nos blocos (versão usada até a P2)</td><td>É assim que Python funciona: um programa Python real compila sem adaptação. O parser continua simples, porque enxerga <code>INDENT</code>/<code>DEDENT</code> como se fossem <code>{</code>/<code>}</code></td><td>O lexer ficou mais complexo (pilha + fila de tokens pendentes). Recuo inconsistente vira erro léxico</td></tr>
+                  <tr><th>Aspas simples convertidas para duplas no lexer (<code>'oi'</code> → <code>"oi"</code>)</th><td>Converter só na geração de código</td><td>Em Python as duas são iguais; em C, texto só existe com aspas duplas. Normalizando cedo, nenhuma etapa seguinte precisa tratar os dois casos</td><td>Uma <code>"</code> dentro do texto é escapada (<code>\"</code>). A AST mostra sempre aspas duplas</td></tr>
+                  <tr><th>String termina na mesma linha; aspa sem fechamento é <strong>erro léxico</strong></th><td>Aceitar string atravessando linhas</td><td>Uma aspa esquecida fazia o lexer engolir várias linhas até a próxima <code>"</code>, e o erro aparecia longe da causa</td><td>Mensagem com o número da linha exata</td></tr>
+                  <tr><th>Precedência com <code>%left</code> e <em>else</em> pendente com <code>%nonassoc</code> no Bison</th><td>Reescrever a gramática em níveis (expr / termo / fator)</td><td>Mais curto e legível; é o mecanismo do próprio Bison para isso</td><td><code>1 + 2 * 3</code> vira <code>(1 + (2 * 3))</code> na AST</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="report-section" id="semantica">
+            <p class="section-index">02 <span>/</span> SEMÂNTICA</p>
+            <h2>Tipos e verificações</h2>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Decisão</th><th>Alternativa considerada</th><th>Por que escolhemos</th><th>Consequência</th></tr></thead>
+                <tbody>
+                  <tr><th>Tipo da variável <strong>deduzido pelo primeiro valor atribuído</strong> (<code>x = 2.5</code> → <code>FLOAT</code>)</th><td>Exigir anotação de tipo (<code>x: float = 2.5</code>) ou usar tipo dinâmico em C (<code>union</code> + etiqueta)</td><td>Python não declara tipos, mas C exige. A dedução mantém o código Python intacto e gera C simples, com tipos nativos</td><td>Uma variável fica presa ao tipo do primeiro valor</td></tr>
+                  <tr><th>Mudar o tipo de uma variável (<code>x = 10</code> e depois <code>x = "texto"</code>) é <strong>erro semântico</strong></th><td>Permitir, como Python permite</td><td>Em C uma variável tem um único tipo. Aceitar exigiria tipo dinâmico em tempo de execução</td><td>Mensagem: <code>variavel 'x' e inteiro e nao pode receber string</code></td></tr>
+                  <tr><th>Reatribuição com o mesmo tipo (<code>x = 10</code> e depois <code>x = 20</code>) é permitida</th><td>Tratar como redeclaração (erro)</td><td>É reatribuição válida em Python; não existe “declarar” uma variável</td><td>Teste <code>tabela/redeclaracao</code> garante esse comportamento</td></tr>
+                  <tr><th>Usar uma variável antes de atribuir é erro semântico</th><td>Inicializar com zero automaticamente</td><td>Em Python isso é <code>NameError</code>; detectar na compilação é mais útil que um valor silencioso</td><td>Mensagem: <code>variavel 'x' usada antes de ser definida</code></td></tr>
+                  <tr><th>Com qualquer erro semântico, <strong>o C não é gerado</strong></th><td>Gerar mesmo assim e deixar o GCC reclamar</td><td>Os erros do GCC sobre código gerado não fazem sentido para quem escreveu Python</td><td>O usuário vê só a mensagem do nosso compilador</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="report-section" id="geracao">
+            <p class="section-index">03 <span>/</span> BACK-END</p>
+            <h2>Geração de código C</h2>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Decisão</th><th>Alternativa considerada</th><th>Por que escolhemos</th><th>Consequência</th></tr></thead>
+                <tbody>
+                  <tr><th>Gerar C <strong>direto da AST</strong>, sem código intermediário (TAC)</th><td>AST → TAC → C</td><td>No subconjunto escolhido a AST já tem toda a informação necessária, e cada nó vira uma construção C equivalente. Menos código para manter e verificar</td><td>Otimizações (constant folding, código morto) não foram implementadas; ficariam mais naturais sobre um TAC</td></tr>
+                  <tr><th>Todas as variáveis declaradas no <strong>início</strong> da função, com o tipo deduzido</th><td>Declarar no ponto do primeiro uso</td><td>Uma atribuição dentro de <code>if</code> ou <code>while</code> declararia a variável só dentro daquele bloco em C, e ela sumiria fora dele</td><td>O gerador percorre a AST duas vezes: uma para coletar variáveis, outra para emitir comandos</td></tr>
+                  <tr><th><code>print</code> vira <code>printf</code> com o formato escolhido pelo tipo (<code>%d</code>, <code>%g</code>, <code>%s</code>; booleano impresso como <code>True</code>/<code>False</code>)</th><td>Um único <code>printf("%d")</code></td><td>A saída do programa C fica igual à do Python</td><td>O gerador precisa saber o tipo de cada expressão, inclusive de variáveis (correção do PR #41)</td></tr>
+                  <tr><th>Concatenação de strings via função auxiliar <code>concatenar()</code>, emitida só quando usada</th><td>Usar <code>strcat</code> direto no ponto do <code>+</code></td><td><code>strcat</code> exige um buffer com espaço; a função aloca o tamanho certo com <code>malloc</code></td><td>O programa gerado não libera essa memória (aceitável para programas curtos)</td></tr>
+                  <tr><th>Parâmetros de função sempre <code>int</code>; tipo de retorno deduzido pelo <code>return</code></th><td>Deduzir o tipo dos parâmetros pelas chamadas</td><td>Simplificação para caber no prazo; cobre os exemplos do subconjunto</td><td>Limitação documentada no <code>compilador/README.md</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="report-section" id="qualidade">
+            <p class="section-index">04 <span>/</span> QUALIDADE</p>
+            <h2>Testes e processo</h2>
+            <div class="table-scroll">
+              <table class="document-table">
+                <thead><tr><th>Decisão</th><th>Alternativa considerada</th><th>Por que escolhemos</th><th>Consequência</th></tr></thead>
+                <tbody>
+                  <tr><th>Suíte de testes <strong>automática</strong>: cada teste é <code>entrada.py</code> + <code>esperado.txt</code>, comparados pelo <code>run_tests.sh</code></th><td>Comparação visual da saída (versão inicial)</td><td>Qualquer mudança que quebre uma etapa aparece na hora como <code>[FALHA]</code> com o <code>diff</code></td><td><code>make test</code> roda 28 testes; o <code>esperado.txt</code> precisa ser atualizado quando o formato da saída muda de propósito</td></tr>
+                  <tr><th>Testes de geração <strong>ponta a ponta</strong>: Python → C → <code>gcc</code> → executa → compara a saída do programa</th><td>Comparar o texto do C gerado</td><td>Testa o que importa (o programa produz o resultado certo) e não quebra com mudanças de formatação do C</td><td>Os testes dependem de ter <code>gcc</code> instalado</td></tr>
+                  <tr><th>Um teste por etapa do compilador (lexer, parser, AST, tabela, geração)</th><td>Só testes do programa inteiro</td><td>Quando algo quebra, a categoria que falha mostra em qual etapa está o problema</td><td>O <code>test_lexer</code> roda só o lexer, imprimindo um token por linha</td></tr>
+                  <tr><th>Fluxo de PR com revisão: nenhuma mudança entra na <code>main</code> sem outro integrante revisar</th><td>Commit direto na <code>main</code></td><td>Evitou que bugs como o BOM invisível quebrassem a <code>main</code> para todos</td><td>Branches curtas e atualizadas com a <code>main</code> para evitar conflitos</td></tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section class="report-section report-section--last" id="registro">
-            <p class="section-index">01 <span>/</span> PROCESSO</p>
+            <p class="section-index">05 <span>/</span> PROCESSO</p>
             <h2>Como registrar novas decisões</h2>
-            
             <ol class="numbered-list">
               <li>Contexto — o que motivou a escolha.</li>
               <li>Alternativas consideradas.</li>
               <li>Decisão adotada.</li>
               <li>Consequências em código, prazo ou testes.</li>
             </ol>
-    
           </section>
 
           <footer class="report-footer">
