@@ -192,15 +192,14 @@ gcc saida.c -o saida_prog
     + sec("documentacao", "05", "ÍNDICE", "Documentação do projeto", """
             <p>Todo o material de MkDocs foi trazido para este layout e atualizado conforme o código do repositório do compilador.</p>
             <div class="doc-grid">
-              <a class="doc-card" href="especificacao.html"><span>01</span><strong>Especificação</strong><p>Objetivo, requisitos oficiais, escopo da subset e critérios de aceite.</p></a>
+              <a class="doc-card" href="especificacao.html"><span>00</span><strong>Especificação</strong><p>Objetivo, requisitos oficiais, escopo da subset e critérios de aceite.</p></a>
               <a class="doc-card" href="guia.html"><span>02</span><strong>Guia detalhado</strong><p>Passos de construção alinhados ao guia da disciplina.</p></a>
-              <a class="doc-card" href="planejamento.html"><span>03</span><strong>Planejamento</strong><p>Metodologia, ferramentas, cronograma e mapa das sprints.</p></a>
-              <a class="doc-card" href="sprints.html"><span>04</span><strong>Sprints</strong><p>Histórico Scrum, da organização até a finalização.</p></a>
-              <a class="doc-card" href="atas.html"><span>05</span><strong>Atas</strong><p>Registros das reuniões e mudanças de linguagem.</p></a>
-              <a class="doc-card" href="atividades.html"><span>06</span><strong>Atividades semanais</strong><p>Práticas da disciplina ligadas ao compilador.</p></a>
-              <a class="doc-card" href="decisoes.html"><span>07</span><strong>Decisões técnicas</strong><p>Justificativas de arquitetura e design.</p></a>
-              <a class="doc-card" href="problemas.html"><span>08</span><strong>Problemas e soluções</strong><p>Impedimentos reais encontrados no código.</p></a>
-              <a class="doc-card" href="tokens.html"><span>10</span><strong>Tokens</strong><p>Referência do analisador léxico atualizado.</p></a>
+              <a class="doc-card" href="planejamento.html"><span>01</span><strong>Planejamento</strong><p>Metodologia, ferramentas, cronograma e mapa das sprints.</p></a>
+              <a class="doc-card" href="sprints.html"><span>02</span><strong>Sprints</strong><p>Histórico Scrum, da organização até a finalização.</p></a>
+              <a class="doc-card" href="atas.html"><span>03</span><strong>Atas</strong><p>Registros das reuniões e mudanças de linguagem.</p></a>
+              <a class="doc-card" href="decisoes.html"><span>04</span><strong>Decisões técnicas</strong><p>Justificativas de arquitetura e design.</p></a>
+              <a class="doc-card" href="problemas.html"><span>05</span><strong>Problemas e soluções</strong><p>Impedimentos reais encontrados no código.</p></a>
+              <a class="doc-card" href="tokens.html"><span>06</span><strong>Tokens</strong><p>Referência do analisador léxico atualizado.</p></a>
             </div>
     """, last=True),
 )
