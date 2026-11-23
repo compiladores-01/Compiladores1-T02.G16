@@ -4,12 +4,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 PAGES = [
     ("index.html", "Projeto"),
-    ("especificacao.html", "Especificação"),
     ("guia.html", "Guia"),
     ("planejamento.html", "Planejamento"),
     ("sprints.html", "Sprints"),
     ("atas.html", "Atas"),
-    ("atividades.html", "Semanas"),
     ("decisoes.html", "Decisões"),
     ("problemas.html", "Problemas"),
     ("tokens.html", "Tokens"),
@@ -584,54 +582,6 @@ page(
     """, last=True),
 )
 
-# ---------- ATIVIDADES ----------
-weeks = [
-    ("1", "Semana 01", "Hello Flex/Bison", "Glossário, guias de ambiente, compilador e interpretador, proposta do trabalho. Prática: hello.l / hello.y.",
-     "Ambiente configurado, Hello World compilando, subset Python → C confirmada."),
-    ("2", "Semana 02", "Expressões regulares", "Guia de ERs no Flex; exemplo que reconhece números e operadores.",
-     "Tokens da subset esboçados em lexer.l; Makefile inspirado na prática."),
-    ("3", "Semana 03", "Scanner", "scanner.l com if/while, ids, números, operadores e comentários C.",
-     "Adaptado para keywords Python, comentários # e tokens consumidos pelo Bison."),
-    ("4", "Semana 04", "Parser inicial", "Expressões com precedência * / sobre + -.",
-     "parser.y da subset, precedência e Makefile integrando lexer + parser."),
-    ("5", "Semana 05", "Erros sintáticos", "Recuperação via error até ;, yyerrok / yyclearin.",
-     "No Python usamos NEWLINE/INDENT em vez de ponto e vírgula. yyerror reporta a linha; recuperação completa ainda é melhoria."),
-    ("6", "Semana 06", "AST e tabela", "ast.c, tabela.c e tipos.h a partir de expressões com identificadores.",
-     "Nós de stmt Python e tabela com escopos; base da semântica e do codegen. Marco P1."),
-    ("7", "Semana 07", "Semântica", "Testes de variável não declarada, redeclaração e tipos.",
-     "Regras no parser.y; mensagens claras para demo P2. Suíte tests/ ainda pode crescer."),
-    ("8", "Semana 08", "IR / TAC", "Protótipo de três endereços na disciplina.",
-     "A equipe optou por emitir C direto da AST, sem TAC no binário atual."),
-    ("9", "Semana 09", "Otimização", "Constant folding sobre a AST.",
-     "Não está no gerador atual; documentada como melhoria."),
-    ("10", "Semana 10", "Código final", "Exemplo Java mínimo → bitcode textual.",
-     "No nosso caso o alvo é C: percorrer AST e emitir saida.c, depois gcc."),
-]
-week_acc = '<div class="accordion">' + "".join(
-    f'<details><summary>Semana {n} — {titulo}</summary><div class="accordion__body"><p><strong>Material:</strong> {mat}</p><p><strong>No projeto G16:</strong> {proj}</p></div></details>'
-    for n, _, titulo, mat, proj in weeks
-) + "</div>"
-
-page(
-    "atividades.html",
-    "Atividades semanais",
-    "Atividades semanais da disciplina ligadas ao compilador.",
-    "ACOMPANHAMENTO <span>/</span> SEMANAS",
-    "Atividades <em>semanais</em>",
-    "Cada semana do repositório da disciplina vira prática no compilador Python → C. Os checklists originais foram atualizados com o estado do código.",
-    """              <p><span>Fonte</span>sergioaafreitas/COMP1</p>
-              <p><span>Semanas</span>1 a 10</p>""",
-    [
-        ("como", "Como usar"),
-        ("semanas", "Semanas 1–10"),
-    ],
-    sec("como", "00", "DISCIPLINA", "Como usar as práticas", """
-            <p>O repositório <a class="text-link" href="https://github.com/sergioaafreitas/COMP1">COMP1</a> traz um exemplo por semana. A equipe replica a ideia no próprio <code>compilador/</code>, em vez de entregar os exemplos isolados.</p>
-            <div class="code-block"><pre><code>git clone https://github.com/sergioaafreitas/COMP1.git
-cd "COMP1/semana 01/src"</code></pre></div>
-    """)
-    + sec("semanas", "01", "DIÁRIO", "Relação com o compilador", week_acc, last=True),
-)
 
 # ---------- DECISOES ----------
 page(
