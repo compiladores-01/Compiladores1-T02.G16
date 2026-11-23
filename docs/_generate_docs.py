@@ -12,7 +12,6 @@ PAGES = [
     ("atividades.html", "Semanas"),
     ("decisoes.html", "Decisões"),
     ("problemas.html", "Problemas"),
-    ("pontos.html", "Pontos"),
     ("tokens.html", "Tokens"),
 ]
 
@@ -712,40 +711,6 @@ page(
                 </tbody>
               </table>
             </div>
-    """, last=True),
-)
-
-# ---------- PONTOS ----------
-page(
-    "pontos.html",
-    "Pontos de controle",
-    "Checklists de P1 e P2.",
-    "AVALIAÇÃO <span>/</span> P1 E P2",
-    "Pontos de <em>controle</em>",
-    "Status das entregas intermediárias, preenchido com evidências do repositório do compilador.",
-    """              <p><span>P1</span>23–30/09/2026</p>
-              <p><span>P2</span>04–11/11/2026</p>""",
-    [
-        ("p1", "Ponto 1"),
-        ("p2", "Ponto 2"),
-    ],
-    sec("p1", "00", "P1", "Ponto de controle 1", """
-            <p>Primeira entrega intermediária: definir o projeto, a subset, o planejamento e mostrar o front-end.</p>
-            <ul class="checklist">
-              <li class="done">Documentação atualizada (especificação, sprints, atas iniciais)</li>
-              <li class="done">Código compilando via Makefile (lexer + parser + AST)</li>
-              <li class="open">Demonstração: ensaiar 5–8 min com todos falando a própria frente</li>
-            </ul>
-            <p>Evidência: repositório com <code>lexer.l</code>, <code>parser.y</code> e dump da AST em programas válidos.</p>
-    """)
-    + sec("p2", "01", "P2", "Ponto de controle 2", """
-            <p>Segunda entrega: pipeline completo e evolução desde P1.</p>
-            <ul class="checklist">
-              <li class="done">Documentação deste site cobrindo todas as abas exigidas</li>
-              <li class="done">Código compilando e gerando C (<code>geracao.c</code>, <code>entrada.py</code>)</li>
-              <li class="open">Demonstração P2: mostrar .py → .c → gcc → execução, mais um erro semântico</li>
-            </ul>
-            <p>Melhorias desde P1: INDENT/DEDENT, funções, semântica de tipos e backend C.</p>
     """, last=True),
 )
 
