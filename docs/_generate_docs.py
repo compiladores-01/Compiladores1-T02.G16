@@ -361,7 +361,6 @@ page(
               <li class="done">Planejamento das sprints</li>
               <li class="done">Problemas e soluções</li>
               <li class="done">Atas e atividades semanais</li>
-              <li class="done">Pontos de controle</li>
               <li class="done">Referência de tokens alinhada ao lexer atual</li>
             </ul>
     """, last=True),
