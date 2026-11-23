@@ -202,7 +202,6 @@ gcc saida.c -o saida_prog
               <a class="doc-card" href="atividades.html"><span>06</span><strong>Atividades semanais</strong><p>Práticas da disciplina ligadas ao compilador.</p></a>
               <a class="doc-card" href="decisoes.html"><span>07</span><strong>Decisões técnicas</strong><p>Justificativas de arquitetura e design.</p></a>
               <a class="doc-card" href="problemas.html"><span>08</span><strong>Problemas e soluções</strong><p>Impedimentos reais encontrados no código.</p></a>
-              <a class="doc-card" href="pontos.html"><span>09</span><strong>Pontos de controle</strong><p>Checklists de P1 e P2.</p></a>
               <a class="doc-card" href="tokens.html"><span>10</span><strong>Tokens</strong><p>Referência do analisador léxico atualizado.</p></a>
             </div>
     """, last=True),
@@ -247,7 +246,6 @@ page(
     + sec("requisitos", "02", "DISCIPLINA", "Requisitos oficiais", """
             <h3>Repositório GitHub</h3>
             <p>Usado durante todo o desenvolvimento. A documentação precisa conter estrutura, decisões, planejamento das sprints, problemas e soluções, atas e acompanhamento.</p>
-            <h3>Pontos de controle</h3>
             <p><strong>P1:</strong> definição do projeto, linguagem e subset, planejamento e o que já foi implementado. Formulário até 23/09/2026, 23h59. Apresentação em 28/09 e 30/09.</p>
             <p><strong>P2:</strong> funcionalidades principais, melhorias desde P1 e ajustes no planejamento. Formulário até 04/11/2026, 23h59. Apresentação em 09/11 e 11/11.</p>
             <div class="callout callout--warning"><strong>Atenção</strong><p>Não envio do formulário no prazo implica nota 0 naquele ponto de controle. Presença de todos os membros é obrigatória em P1, P2 e na entrevista final (T).</p></div>
